@@ -1,0 +1,83 @@
+<style>
+.navigation-list-text {
+  display: inline-block;
+  width:100%;
+  padding:10px 0px;
+  margin-right: -15px;
+}
+.navigation-list-inner .widget li .navigation-list-button {
+  width:30px;
+  margin-left : -30px;
+}
+.navigation-list-child li {
+  background:#aaaaaa;
+}
+.navigation-list-off ul {
+  display:none;
+}
+</style>
+
+<script>
+var G1sNavigationList = {
+  init : function($list){
+    this.sortList($list);
+    this.onListHover();
+    this.onDrawerClick();
+  },
+  sortList : function($list){
+    var tempList = $list;
+    var parent = null;
+    var childUl = null;
+    for( var i=0; i< tempList.length; i++ ){
+      if( tempList[i].firstChild.text.startsWith("_") && parent != null ){
+        if( childUl == null ){
+          childUl = this.newChild( parent );
+        }
+        tempList[i].firstChild.text = tempList[i].firstChild.text.substring(1, tempList[i].firstChild.text.length);
+        childUl.append( tempList[i] );
+      } else {
+        if( parent != null ){
+          childUl = null;
+        }
+        parent = $( tempList[i] );
+        parent.find('a').addClass('navigation-list-text');
+      }
+    }
+  },
+  newChild : function ( parent ){
+    var childUl = $('<ul>', {class : 'navigation-list-child'} );
+    parent.append( $('<a>', {class : 'navigation-list-button', text:'+', href:'javascript:void(0);'} ) );
+    parent.append( childUl );
+    parent.addClass( "navigation-list-parent" );
+    parent.addClass( "navigation-list-off" );
+    return childUl;
+  },
+  onListHover : function(){
+    $( ".navigation-list-off" ).hover(function(){
+ $( this ).removeClass("navigation-list-off");
+    }, function(){
+      if( ! ($( this ).hasClass("navigation-list-on")) ){
+        $( this ).addClass("navigation-list-off");
+ }
+    });
+  },
+  onDrawerClick : function() {
+      $( ".navigation-list-button" ).click(function(){
+        var parent = $( this ).parent();
+        if( $( parent ).hasClass("navigation-list-on") ){
+        $( parent ).removeClass("navigation-list-on");
+        $( parent ).addClass("navigation-list-off");
+        $( this )[0].text = '+';
+      } else {
+        $( parent ).removeClass("navigation-list-off");
+        $( parent ).addClass("navigation-list-on");
+        $( this )[0].text = '-';
+      }
+    });
+  }
+}
+
+$( ".navigation-list" ).ready(function() {
+  G1sNavigationList.init($('.LinkList li'));
+});
+</script>

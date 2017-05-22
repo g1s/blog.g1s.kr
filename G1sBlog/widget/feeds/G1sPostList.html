@@ -1,0 +1,234 @@
+<style>
+    #posts{padding: 10px;}
+    .g1sPostsPost{clear: both;}
+    .g1sPostsTitle{}
+    .g1sPostsTag{float:left;}
+    .g1sPostsRight{float:right; text-align:right; width:99%;}
+</style>
+<div class='g1s'>
+<div id="posts"></div><br/>
+<div id='posts-pgno' align='center' style='clear:both; cursor:pointer;'></div>
+</div>
+<script language="Javascript" type="text/javascript">
+    /** url의 Parameter를 얻는 Class. **/
+    var g1sRequest = {  
+        parameter: function(name) {
+            return this.parameters()[name];
+        },
+        
+        parameters: function() {
+            var result = {};
+            var url = window.location.href;
+            var parameters = url.slice(url.indexOf('?') + 1).split('&');
+            
+            for(var i = 0;  i < parameters.length; i++) {
+                var parameter = parameters[i].split('=');
+                result[parameter[0]] = parameter[1];
+            }
+            return result;
+        }
+    }
+    
+    /** Page의 정보를 저장. **/
+    var g1sPage = {
+        //초기화.
+        init: function(home,max){
+            g1sPage.home = home;
+            g1sPage.max = max;
+            g1sPage.label = '';
+            g1sPage.no = 1;
+        },          
+            
+        //url의 parameter에서 pgno 값을 읽어 옮.
+        setPage: function(){
+            var url = window.location.href;
+    
+            var pl = url.lastIndexOf("/label/");
+            var pq = url.lastIndexOf("?");
+            
+            if(pl != -1)
+                g1sPage.label = url.substr(pl+7,((pq!=-1)?pq:url.length)-(pl+7));
+            
+            if(url.indexOf("pgno") != -1)
+                g1sPage.no = g1sRequest.parameter("pgno");
+                
+        }
+        
+    }
+    /** feed를 parsing 하여 결과 뿌려 줌. **/
+    var g1sObj = {
+        init: function () {
+            g1sObj.obj = document.getElementById('posts');
+            g1sObj.pgno = document.getElementById('posts-pgno');
+        },
+        
+        // 검색을 요청하는 함수 
+        pingSearch: function () {
+            //변수 선언.
+            g1sObj.s = document.createElement('script');
+            g1sObj.s.type = 'text/javascript';
+            g1sObj.s.charset = 'utf-8';
+            
+            //feed callback 함수를 이용 json 객체 구한 후 pongSearch 함수호출. 
+            if(g1sPage.label == '')
+                g1sObj.s.src = '' + g1sPage.home + '/feeds/posts/summary/?max-results='+(g1sPage.no*g1sPage.max)+'&alt=json-in-script&callback=g1sObj.pongSearch';
+            else
+                g1sObj.s.src = '' + g1sPage.home + '/feeds/posts/summary/-/'+g1sPage.label+'?max-results='+(g1sPage.no*g1sPage.max)+'&alt=json-in-script&callback=g1sObj.pongSearch';
+                
+            //append.
+            document.getElementsByTagName('head')[0].appendChild(g1sObj.s);
+        },
+            
+        // 검색 결과를 뿌리는 함수 
+        pongSearch: function (z) {
+            g1sObj.obj.innerHTML = '';
+            
+            /* 글 목록을 뿌려 줌. */
+            for (var i = (g1sPage.no-1)*g1sPage.max; i < g1sPage.no*g1sPage.max; i++) {
+                //예외처리.
+                if(i >= z.feed.openSearch$totalResults.$t)
+                    break;
+                
+                //변수선언.
+                var li = document.createElement("li");
+                var div = document.createElement('div');
+                var a1 = document.createElement('a');
+                var a2 = document.createElement('a');
+                
+                //link로 사용할 base url.
+                var url = g1sPage.home + '/search';
+                if(g1sPage.label != '')
+                    url += '/label/' + g1sPage.label;
+                
+                //최종 link를 url 입력.
+                if (i == 0){ 
+                    a1.href = url + '?max-results=1';
+                    a2.href = url + '?max-results=1';
+                }
+                else {
+                    var published = g1sObj.changeTime(z.feed.entry[i - 1].published.$t);
+                    a1.href = url + '?updated-max=' + published + '&max-results=1&pgno='+g1sPage.no;
+                    a2.href = url + '?updated-max=' + published + '&max-results=1&pgno='+g1sPage.no;
+                }
+                //제목만 a.innerHTML = g1sObj.escapeHtml(z.feed.entry[i].title.$t);
+                
+                //시간.
+                var ldiv = document.createElement('div');
+                var published = z.feed.entry[i].published.$t;
+                var y,mm,d,h,m,s;
+                y = 1 * published.substr(0,4);
+                mm = 1 * published.substr(5,2)-1;
+                d = 1 * published.substr(8,2);
+                h = 1 * published.substr(11,2);
+                m = 1 * published.substr(14,2);
+                s = 1 * published.substr(17,2);
+var date = new Date(y, mm, d, h, m, s);
+var dt;
+                if(published.charAt('+'))
+                    dt = (parseInt(published.substr(25,2)) * 60 + parseInt(published.substr(28,2)))*60000;
+                else
+                    dt = (-parseInt(published.substr(25,2)) * 60 - parseInt(published.substr(28,2)))*60000;
+                var rdate = new Date(date.getTime() + dt);
+               //a1.innerHTML = g1sObj.escapeHtml(rdate.getFullYear() +"."+ (rdate.getMonth()+1) +"."+ rdate.getDate() +". "+ rdate.getHours() +":"+ rdate.getMinutes() +":"+ ((rdate.getSeconds()<10)?"0"+rdate.getSeconds():rdate.getSeconds()));
+  a1.innerHTML = g1sObj.escapeHtml(date.getFullYear() +"."+ (date.getMonth()+1) +"."+ date.getDate() +". "+ date.getHours() +":"+ date.getMinutes() +":"+ ((date.getSeconds()<10)?"0"+date.getSeconds():date.getSeconds()));
+   //제목
+                var rdiv = document.createElement('div');
+                div.className = "g1sPostsPost";
+                ldiv.className = "g1sPostsLeft";
+                rdiv.className = "g1sPostsRight";
+                a2.className = 'g1sPostsTitle';
+                a2.innerHTML = g1sObj.escapeHtml(z.feed.entry[i].title.$t);
+                if(a2.innerHTML.length > 100)
+                    a2.innerHTML = a2.innerHTML.substr(0,100) + '...';
+                ldiv.appendChild(a2);
+                //라벨
+                for(var j in z.feed.entry[i].category){
+                    var a3 = document.createElement('a');
+                    a3.className = 'g1sPostsTag';
+                    a3.style.color = 'green';
+                    a3.href = g1sPage.home + '/search/label/' + z.feed.entry[i].category[j].term + '?max-results=1';
+                    a3.innerHTML = g1sObj.escapeHtml('['+z.feed.entry[i].category[j].term+']');
+                    rdiv.appendChild(a3);
+                }
+                
+                rdiv.appendChild(a1);
+                div.appendChild(ldiv);
+                div.appendChild(rdiv);
+                
+                //append
+                li.appendChild(div);
+                g1sObj.obj.appendChild(li);
+            }
+                
+            /* page 뿌려줌. */
+            g1sObj.pongPgno(z);
+        },
+        
+        // page를 뿌려주는 함수.
+        pongPgno: function(z){
+            g1sObj.pgno.innerHTML = '';
+            var before = document.createElement('a');
+            var next = document.createElement('a');
+            
+            var ten = parseInt((g1sPage.no-1)/10);
+            var total = z.feed.openSearch$totalResults.$t;
+
+            /* before page */
+            before.innerHTML = ' << ';          
+            if(ten>0)
+                g1sObj.onMouseDown(before, ten*10);
+            g1sObj.pgno.appendChild(before);
+            
+            /* page number */
+            for(var i=ten*10; i< (ten+1)*10; i++){
+                if(i >= total/g1sPage.max)
+                    break;
+                var a = document.createElement('a');
+                g1sObj.onMouseDown(a,i+1);
+                
+                a.innerHTML = ' ' + (i+1) + ' ';
+                
+                if(i+1 == g1sPage.no)
+                    a.style.color = 'yellow';                   
+                g1sObj.pgno.appendChild(a);
+            }
+                
+            /* next page */
+            next.innerHTML = ' >> ';
+            if(ten< parseInt(total/g1sPage.max/10))
+                g1sObj.onMouseDown(next, (ten+1)*10+1);
+            g1sObj.pgno.appendChild(next);
+        },
+            
+        //mouse click event.
+        onMouseDown: function(a, i){
+            a.onmousedown = function(){
+                g1sPage.no = i;
+                g1sObj.pingSearch();
+            }
+        },
+
+        //Time 에러 수정.
+        changeTime: function(str){
+            var s = str.lastIndexOf('.')-1;
+            var e = str.lastIndexOf('+')+1;
+            
+            var str2 = str.substr(0,s) + '%2B' + str.substr(e,100);
+            
+            return str2;
+        },
+        
+        // HTML태그 안 먹게 하는 함수
+        escapeHtml: function (str) {
+            str = str.replace(/&amp;/g, "&");
+            str = str.replace(/&lt;/g, "<");
+            str = str.replace(/&gt;/g, ">");
+            return str;
+        }
+    };
+
+    g1sPage.init('', 5);
+    g1sPage.setPage();
+    g1sObj.init();  
+    g1sObj.pingSearch();
+</script>

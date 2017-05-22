@@ -1,0 +1,76 @@
+<!-- 
+With G1sUtil.js, G1sBlogger.js
+
+/common/js/G1sUtil.js
+/common/js/G1sBlogger.js
+-->
+
+<style>
+  #g1sFeature .wrap {
+      position: relative;
+      width:33%;
+      float: left;
+  }
+
+  #g1sFeature .content {
+    position: absolute;
+    left : 0px;
+    right : 0px;
+    bottom:0px;
+    padding : 5px;
+    background:#ffffff;
+
+    /* 투명도 */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";       /* IE 8 */
+    filter: alpha(opacity=50);  /* IE 5-7 */
+    -moz-opacity: 0.5;          /* Netscape */
+    -khtml-opacity: 0.5;        /* Safari 1.x */
+    opacity: 0.5;               /* Good browsers */
+  }
+
+  #g1sFeature .img {
+      width: 100%;
+  }
+  #g1sFeature .title {
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    word-wrap:normal;
+    width:100%;
+    overflow: hidden;
+  }
+</style>
+<div id="g1sFeature" data-g1s="g1sFeature" data-g1s-each="$data.feed.entry">
+  <a class="item" target="_blank" data-g1s data-g1s-href="G1sBlogger.getPostUrl($data.feed.entry[$0])">
+    <div class="wrap">
+      <img class="img" data-g1s data-g1s-src="G1sBlogger.getImgUrl($data, $index[0], 's300-c')" />
+      <div class="content">
+        <div class="title" data-g1s data-g1s-text="$data.feed.entry[$0].title.$t">타이틀</div>
+        <div class="summary" data-g1s data-g1s-text="G1sUtil.ellipsis($data.feed.entry[$0].summary.$t, 60)">내용</div>
+      </div>
+    </div>
+  </a>
+</div>
+
+<script>
+function loadG1sFeature(data){
+  g$('[=g1sFeature]').hide();
+  g$('[=g1sFeature]').push(data);
+
+  $(window).resize(function(){
+    resize();
+  });
+  function resize(){
+    var w = g$('[=g1sFeature]').width();
+    if(w < 600){
+      g$('[=g1sFeature] .wrap').width(w)
+    } else {
+      g$('[=g1sFeature] .wrap').width(w * 32/100)
+    }
+  }
+  setTimeout(function(){
+    resize();
+    g$('[=g1sFeature]').show();
+  }, 1000);
+}
+</script>
+<script src="/feeds/posts/summary/-/feature?alt=json&max-results=3&callback=loadG1sFeature" ></script>

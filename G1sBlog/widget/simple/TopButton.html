@@ -1,0 +1,40 @@
+<style>
+.topbutton div {
+  position : fixed;
+  bottom : 5px;
+  right : 5px;
+  display : none;
+
+  width:50px;
+  height:50px;
+  border-radius:25px;
+  -moz-border-radius : 25px;
+  -webkit-border-radius : 25px;
+  -ms-border-radius :25px;
+  -khtml-border-radius : 25px;
+  -o-border-radius :25px;
+  background:#09F;
+  font:normal 12px/50px "³ª´®°íµñ", "µ¸¿ò", "±¼¸²";
+  color:#fff;
+  text-align:center;
+}
+</style>
+<a class="topbutton" href="javascript:void(0);"><div>Top</div></a>
+<script>
+  $('.topbutton').ready(function(){
+    $('.topbutton').click(function(){
+      $('body').animate({scrollTop : 0}, 400);
+    });
+
+    var lastScroll = 0;
+    $(window).scroll(function(e){
+      var now = $(window).scrollTop();
+      if(now > $('body').height() && now < lastScroll ){
+        $('.topbutton div').show();
+      } else {
+        $('.topbutton div').hide();
+      }
+      lastScroll = now;
+    });
+  });
+</script>

@@ -1,0 +1,45 @@
+<!-- 
+With G1sUtil.js, G1sBlogger.js
+
+/common/js/G1sUtil.js
+/common/js/G1sBlogger.js
+-->
+
+<style>
+#G1sMainPosts li {
+    padding: .7em 0;
+}
+#G1sMainPosts .item-thumbnail {
+    float: left;
+    margin: 0 5px 5px 0;
+}
+#G1sMainPosts .item-title {
+    padding-bottom: .2em;
+}
+#G1sMainPosts img {
+    padding-right: .4em;
+}
+</style>
+
+<ul id="G1sMainPosts" data-g1s="G1sMainPosts" data-g1s-each="$data.feed.entry">
+  <li>
+    <div class="item-content">
+      <div class="item-thumbnail">
+        <a target="_blank" data-g1s data-g1s-href="G1sBlogger.getPostUrl($data.feed.entry[$0])">
+          <img data-g1s data-g1s-src="$data.feed.entry[$0].media$thumbnail.url" />
+        </a>
+      </div>
+      <div class="item-title">
+        <a data-g1s data-g1s-href="G1sBlogger.getPostUrl($data.feed.entry[$0])" data-g1s-text="$data.feed.entry[$0].title.$t"></a>
+      </div>
+      <div class="item-snippet" data-g1s data-g1s-text="G1sUtil. ellipsis ($data.feed.entry[$0].summary.$t, 130)"></div>
+    </div>
+  </li>
+</ul>
+
+<script>
+function getG1sMainPosts(data){
+  g$('[=G1sMainPosts]').push(data);
+}
+</script>
+<script src="/feeds/posts/summary/-/%EC%9D%BC%EC%83%81?alt=json&max-results=3&callback=getG1sMainPosts" ></script>

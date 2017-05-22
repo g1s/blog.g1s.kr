@@ -1,0 +1,52 @@
+<!-- 
+<meta content='[YOUR_SECURE_KEY::Google OAuth ClientKey].apps.googleusercontent.com' name='google-signin-client_id'/>
+ -->
+
+<script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+<span id="g1sSign"></span><a id="g1sUser" href="javascript:void(0)">login</a>
+<style>
+#g1sSign { float : left; }
+</style>
+<script>
+var G1sBlogLogin = { };
+$('#g1sUser').ready(function(){
+  $('#g1sUser').click(function(){
+    if(G1sUtil.isEmpty(G1sBlogLogin.profile)){
+      G1sBlogLogin.reload = true;
+      $('#g1sSign>div').click()
+    } else {
+      var r = confirm('로그아웃 하시겠습니까?');
+      if(r){
+        location.href = 'http://g1stest.blogspot.com/logout?d=https://www.blogger.com/logout-redirect.g?blogID%3D'+G1sBlogger.blogId+((G1sUtil.isEmpty(G1sBlogger.postId))?'':('%26postID%3D'+G1sBlogger.postId));
+      }
+    }
+  });
+});
+function onSuccess(googleUser) {
+  G1sBlogLogin.profile = googleUser.getBasicProfile();
+  //console.log('ID: ' + G1sBlogLogin.profile.getId()); // Do not send to your backend! Use an ID token instead.
+  //console.log('Name: ' + G1sBlogLogin.profile.getName());
+  //console.log('Image URL: ' + G1sBlogLogin.profile.getImageUrl());
+  //console.log('Email: ' + G1sBlogLogin.profile.getEmail()); // This is null if the 'email' scope is not present.
+  if(G1sBlogLogin.reload){
+    G1sBlogLogin.reload = false;
+    location.reload();
+  } else {
+    $('#g1sUser').text(G1sBlogLogin.profile.getName());
+  }
+}
+function onFailure(error) {
+  console.log(error);
+}
+function renderButton() {
+  gapi.signin2.render('g1sSign', {
+        'scope': 'profile email',
+        'width': 30,
+        'height': 30,
+        'longtitle': true,
+        'theme': 'dark',
+        'onsuccess': onSuccess,
+        'onfailure': onFailure
+  });
+}
+</script>
