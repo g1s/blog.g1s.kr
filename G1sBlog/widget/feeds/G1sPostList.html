@@ -10,7 +10,7 @@
 <div id='posts-pgno' align='center' style='clear:both; cursor:pointer;'></div>
 </div>
 <script language="Javascript" type="text/javascript">
-    /** urlÀÇ Parameter¸¦ ¾ò´Â Class. **/
+    /** urlì˜ Parameterë¥¼ ì–»ëŠ” Class. **/
     var g1sRequest = {  
         parameter: function(name) {
             return this.parameters()[name];
@@ -29,9 +29,9 @@
         }
     }
     
-    /** PageÀÇ Á¤º¸¸¦ ÀúÀå. **/
+    /** Pageì˜ ì •ë³´ë¥¼ ì €ì¥. **/
     var g1sPage = {
-        //ÃÊ±âÈ­.
+        //ì´ˆê¸°í™”.
         init: function(home,max){
             g1sPage.home = home;
             g1sPage.max = max;
@@ -39,7 +39,7 @@
             g1sPage.no = 1;
         },          
             
-        //urlÀÇ parameter¿¡¼­ pgno °ªÀ» ÀĞ¾î ¿Å.
+        //urlì˜ parameterì—ì„œ pgno ê°’ì„ ì½ì–´ ì˜®.
         setPage: function(){
             var url = window.location.href;
     
@@ -55,21 +55,21 @@
         }
         
     }
-    /** feed¸¦ parsing ÇÏ¿© °á°ú »Ñ·Á ÁÜ. **/
+    /** feedë¥¼ parsing í•˜ì—¬ ê²°ê³¼ ë¿Œë ¤ ì¤Œ. **/
     var g1sObj = {
         init: function () {
             g1sObj.obj = document.getElementById('posts');
             g1sObj.pgno = document.getElementById('posts-pgno');
         },
         
-        // °Ë»öÀ» ¿äÃ»ÇÏ´Â ÇÔ¼ö 
+        // ê²€ìƒ‰ì„ ìš”ì²­í•˜ëŠ” í•¨ìˆ˜ 
         pingSearch: function () {
-            //º¯¼ö ¼±¾ğ.
+            //ë³€ìˆ˜ ì„ ì–¸.
             g1sObj.s = document.createElement('script');
             g1sObj.s.type = 'text/javascript';
             g1sObj.s.charset = 'utf-8';
             
-            //feed callback ÇÔ¼ö¸¦ ÀÌ¿ë json °´Ã¼ ±¸ÇÑ ÈÄ pongSearch ÇÔ¼öÈ£Ãâ. 
+            //feed callback í•¨ìˆ˜ë¥¼ ì´ìš© json ê°ì²´ êµ¬í•œ í›„ pongSearch í•¨ìˆ˜í˜¸ì¶œ. 
             if(g1sPage.label == '')
                 g1sObj.s.src = '' + g1sPage.home + '/feeds/posts/summary/?max-results='+(g1sPage.no*g1sPage.max)+'&alt=json-in-script&callback=g1sObj.pongSearch';
             else
@@ -79,28 +79,28 @@
             document.getElementsByTagName('head')[0].appendChild(g1sObj.s);
         },
             
-        // °Ë»ö °á°ú¸¦ »Ñ¸®´Â ÇÔ¼ö 
+        // ê²€ìƒ‰ ê²°ê³¼ë¥¼ ë¿Œë¦¬ëŠ” í•¨ìˆ˜ 
         pongSearch: function (z) {
             g1sObj.obj.innerHTML = '';
             
-            /* ±Û ¸ñ·ÏÀ» »Ñ·Á ÁÜ. */
+            /* ê¸€ ëª©ë¡ì„ ë¿Œë ¤ ì¤Œ. */
             for (var i = (g1sPage.no-1)*g1sPage.max; i < g1sPage.no*g1sPage.max; i++) {
-                //¿¹¿ÜÃ³¸®.
+                //ì˜ˆì™¸ì²˜ë¦¬.
                 if(i >= z.feed.openSearch$totalResults.$t)
                     break;
                 
-                //º¯¼ö¼±¾ğ.
+                //ë³€ìˆ˜ì„ ì–¸.
                 var li = document.createElement("li");
                 var div = document.createElement('div');
                 var a1 = document.createElement('a');
                 var a2 = document.createElement('a');
                 
-                //link·Î »ç¿ëÇÒ base url.
+                //linkë¡œ ì‚¬ìš©í•  base url.
                 var url = g1sPage.home + '/search';
                 if(g1sPage.label != '')
                     url += '/label/' + g1sPage.label;
                 
-                //ÃÖÁ¾ link¸¦ url ÀÔ·Â.
+                //ìµœì¢… linkë¥¼ url ì…ë ¥.
                 if (i == 0){ 
                     a1.href = url + '?max-results=1';
                     a2.href = url + '?max-results=1';
@@ -110,9 +110,9 @@
                     a1.href = url + '?updated-max=' + published + '&max-results=1&pgno='+g1sPage.no;
                     a2.href = url + '?updated-max=' + published + '&max-results=1&pgno='+g1sPage.no;
                 }
-                //Á¦¸ñ¸¸ a.innerHTML = g1sObj.escapeHtml(z.feed.entry[i].title.$t);
+                //ì œëª©ë§Œ a.innerHTML = g1sObj.escapeHtml(z.feed.entry[i].title.$t);
                 
-                //½Ã°£.
+                //ì‹œê°„.
                 var ldiv = document.createElement('div');
                 var published = z.feed.entry[i].published.$t;
                 var y,mm,d,h,m,s;
@@ -131,7 +131,7 @@ var dt;
                 var rdate = new Date(date.getTime() + dt);
                //a1.innerHTML = g1sObj.escapeHtml(rdate.getFullYear() +"."+ (rdate.getMonth()+1) +"."+ rdate.getDate() +". "+ rdate.getHours() +":"+ rdate.getMinutes() +":"+ ((rdate.getSeconds()<10)?"0"+rdate.getSeconds():rdate.getSeconds()));
   a1.innerHTML = g1sObj.escapeHtml(date.getFullYear() +"."+ (date.getMonth()+1) +"."+ date.getDate() +". "+ date.getHours() +":"+ date.getMinutes() +":"+ ((date.getSeconds()<10)?"0"+date.getSeconds():date.getSeconds()));
-   //Á¦¸ñ
+   //ì œëª©
                 var rdiv = document.createElement('div');
                 div.className = "g1sPostsPost";
                 ldiv.className = "g1sPostsLeft";
@@ -141,7 +141,7 @@ var dt;
                 if(a2.innerHTML.length > 100)
                     a2.innerHTML = a2.innerHTML.substr(0,100) + '...';
                 ldiv.appendChild(a2);
-                //¶óº§
+                //ë¼ë²¨
                 for(var j in z.feed.entry[i].category){
                     var a3 = document.createElement('a');
                     a3.className = 'g1sPostsTag';
@@ -160,11 +160,11 @@ var dt;
                 g1sObj.obj.appendChild(li);
             }
                 
-            /* page »Ñ·ÁÁÜ. */
+            /* page ë¿Œë ¤ì¤Œ. */
             g1sObj.pongPgno(z);
         },
         
-        // page¸¦ »Ñ·ÁÁÖ´Â ÇÔ¼ö.
+        // pageë¥¼ ë¿Œë ¤ì£¼ëŠ” í•¨ìˆ˜.
         pongPgno: function(z){
             g1sObj.pgno.innerHTML = '';
             var before = document.createElement('a');
@@ -208,7 +208,7 @@ var dt;
             }
         },
 
-        //Time ¿¡·¯ ¼öÁ¤.
+        //Time ì—ëŸ¬ ìˆ˜ì •.
         changeTime: function(str){
             var s = str.lastIndexOf('.')-1;
             var e = str.lastIndexOf('+')+1;
@@ -218,7 +218,7 @@ var dt;
             return str2;
         },
         
-        // HTMLÅÂ±× ¾È ¸Ô°Ô ÇÏ´Â ÇÔ¼ö
+        // HTMLíƒœê·¸ ì•ˆ ë¨¹ê²Œ í•˜ëŠ” í•¨ìˆ˜
         escapeHtml: function (str) {
             str = str.replace(/&amp;/g, "&");
             str = str.replace(/&lt;/g, "<");
