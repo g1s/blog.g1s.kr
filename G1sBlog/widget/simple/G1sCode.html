@@ -1,0 +1,97 @@
+<script src="//www.g1s.kr/down/lib/prettify/prettify.js" ></script>
+<style>
+.g1sCodeStyle {
+  overflow:auto;
+}
+</style>
+<script>
+var G1sCode = new function(){
+  var o = {};
+  o.version = '1.0.0.0';
+  o.theme = 'sons-of-obsidian';
+
+  var _o = {};
+  _o.class = ['g1sCodeStyle', 'prettyprint', 'linenums:1'];
+  _o.tag = ['PRE', 'CODE', 'XMP'];
+  _o.http = 'http://www.g1s.kr/down/lib/prettify/';
+
+  o.github = function(t, u){
+    var u2 = u.split('/');
+    u2[2] = 'raw.githubusercontent.com';
+    u2[5] = '_____';
+    var u3 = u2.join('/').replace('/_____/','/');
+    t.addClass('github');
+    t.html('<a class="link" target="_blank" href="'+u+'">이동</a> '
+         + '<a class="link" target="_blank" href="'+u3+'">LAW</a> '
+         + '<a class="view" href="javascript:void(0)">소스보기</a>'
+         + '<pre class="code"></pre>');
+    t.find('a.view').click(function(){
+      G1sCode.down(t.find('.code'), u3);
+      t.find('a.view').off('click');
+      G1sUtil.btnShow(t.find('a.view'), t.find('.code')
+      , function(){
+        t.find('a.view').text('소스닫기')
+      }, function(){
+        t.find('a.view').text('소스보기')
+      }, 'slow');
+    });
+  }
+
+  o.down = function(t, u){
+    $.ajax({
+      url : u,
+      success:function(d){
+        t.text(d);
+        o.render(t);
+      }
+    });
+  }
+
+  o.render = function(t){
+    t.each(function(i){
+      var te = $(this);
+      if(!_o.tag.includes(this.tagName)){
+        var p = $('<pre />');
+        var txt = this.innerHTML;
+        p.text(txt);
+        $(this).text('');
+        $(this).append(p);
+        te = p;
+        _movedTarget($(this), te);
+      }
+      for(var i in _o.class){
+        if(!t.hasClass(_o.class[i])){
+          t.addClass(_o.class[i]);
+        }
+      }
+    });
+
+    _render();
+  }
+
+  function _movedTarget(t1, t2){
+    var b = t1.attr('class');
+    if(G1sUtil.isEmpty(b)) return;
+    var c = b.split(' ');
+    for(var i in c){
+      t2.addClass(c[i]);
+      t1.removeClass(c[i]);
+    }
+  }
+
+  function _render(){
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = _o.http+(o.theme === 'default'? 'prettify.css' : 'skins/'+o.theme+'.css');
+    document.getElementsByTagName('head')[0].appendChild(link);
+    prettyPrint()
+  }
+
+  return o;
+}
+
+$('.g1sCode').ready(function(){
+  G1sCode.render($('.g1sCode'));
+});
+</script>
