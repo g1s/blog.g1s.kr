@@ -1,8 +1,12 @@
-/** G1sUtil.js * */
+/** 
+ * 필요 라이브러리 : jQuery.js
+ * 
+ * https://github.com/g1s/blog.g1s.kr/blob/master/G1sBlog/common/js/G1sUtil.js 
+ **/
 var g$;
 var G1sUtil = new function() {
   var o = {};
-  o.version = '1.0.1.0';
+  o.version = '1.0.2.0';
   o.isEmpty = function(s) {
     return s == undefined 
       || s == null 
@@ -55,13 +59,21 @@ var G1sUtil = new function() {
   o.ellipsis = function(t, l) {
     return (t.length > l) ? (t.substring(0, l) + '...') : t;
   }
-  
   o.btnShow = function(b, d, fs, fh, o){
     fs = typeof fs == 'function'?fs:function(){};
     fh = typeof fh == 'function'?fh:function(){};
     d.css('display')=='none'?fh():fs();
     b.click(function(){
-      d.css('display')=='none'?G1sUtil.isEmpty(o)?(d.show(), fs()):d.show(o,fs):G1sUtil.isEmpty(o)?(d.hide(), fh()):d.hide(o, fh);
+      d.css('display')=='none'?G1sUtil.isEmpty(o)?(d.show(), fs()):d.show(o,fs)
+        :G1sUtil.isEmpty(o)?(d.hide(), fh()):d.hide(o, fh);
+    });
+  }
+  o.script = function(u, f){
+    $.ajax({
+      type: "GET",
+      url: u,
+      dataType: "script",
+      success : f
     });
   }
 
