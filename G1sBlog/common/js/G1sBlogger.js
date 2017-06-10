@@ -8,7 +8,7 @@
  **/
 
 var G1sBlogger = new function() {
-  var r = { version : '1.0.0.0' };
+  var r = { version : '1.0.1.0' };
   r.feed = {};
   function getFeedLink() {
     var link = $('link');
