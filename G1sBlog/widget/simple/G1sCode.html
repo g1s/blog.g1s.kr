@@ -1,13 +1,13 @@
-<style>
-.g1sCodeStyle {
-  overflow:auto;
-  max-height:500px;
-}
-</style>
 <script>
+/**
+ * 필요 라이브러리 : 
+ * 	 - jQuery.js
+ * 	 - G1sUtil.js (v1.0.2.0) : 
+ * 	   https://github.com/g1s/blog.g1s.kr/blob/master/G1sBlog/common/js/G1sUtil.js
+ */
 var G1sCode = new function(){
   var o = {};
-  o.version = '1.0.1.0';
+  o.version = '1.0.2.0';
   o.theme = 'sons-of-obsidian';
 
   var _o = {};
@@ -42,13 +42,15 @@ var G1sCode = new function(){
     $.ajax({
       url : u,
       success:function(d){
-        t.text(d);
-        o.render(t);
+        o.render(t, d);
       }
     });
   }
 
-  o.render = function(t){
+  o.render = function(t, d){
+    if(!G1sUtil.isEmpty(d)){
+      t.text(d.trim());
+    }
     t.each(function(i){
       var te = $(this);
       if(!_o.tag.includes(this.tagName)){
@@ -89,14 +91,10 @@ var G1sCode = new function(){
       link.type = 'text/css';
       link.href = _o.http+(o.theme === 'default'? 'prettify.css' : 'skins/'+o.theme+'.css');
       document.getElementsByTagName('head')[0].appendChild(link);
-      $.ajax({
-        type: "GET",
-        url: _o.http + "prettify.js",
-        dataType: "script",
-        success : function(){
+      G1sUtil.script(_o.http + "prettify.js"
+        , function(){
           _o.loaded = true;
           prettyPrint()
-        }
       });
     }
   }
@@ -108,3 +106,9 @@ $('.g1sCode').ready(function(){
   G1sCode.render($('.g1sCode'));
 });
 </script>
+<style>
+.g1sCodeStyle {
+  overflow:auto;
+  max-height:500px;
+}
+</style>
