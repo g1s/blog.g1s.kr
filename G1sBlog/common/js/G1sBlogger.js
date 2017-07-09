@@ -5,7 +5,7 @@
  **/
 
 var G1sBlogger = new function() {
-  var r = { version : '1.1.0.0' };
+  var r = { version : '1.0.3.0' };
   r.link = getFeedLink();
   r.app = angular.module('app', []);
   
