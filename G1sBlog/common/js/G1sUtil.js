@@ -1,12 +1,11 @@
-/** 
- * 필요 라이브러리 : jQuery.js
- * 
- * https://github.com/g1s/blog.g1s.kr/blob/master/G1sBlog/common/js/G1sUtil.js 
+/** 필요 라이브러리 : 
+ * jQuery.js
  **/
 var g$;
 var G1sUtil = new function() {
   var o = {};
-  o.version = '1.0.2.0';
+  o.version = '1.0.3.0';
+  o.value = function(v,d){ return o.isEmpty(v)?d:v; }
   o.isEmpty = function(s) {
     return s == undefined 
       || s == null 
@@ -64,8 +63,8 @@ var G1sUtil = new function() {
     fh = typeof fh == 'function'?fh:function(){};
     d.css('display')=='none'?fh():fs();
     b.click(function(){
-      d.css('display')=='none'?G1sUtil.isEmpty(o)?(d.show(), fs()):d.show(o,fs)
-        :G1sUtil.isEmpty(o)?(d.hide(), fh()):d.hide(o, fh);
+      d.css('display')=='none'?o.isEmpty(o)?(d.show(), fs()):d.show(o,fs)
+        :o.isEmpty(o)?(d.hide(), fh()):d.hide(o, fh);
     });
   }
   o.script = function(u, f){
@@ -76,18 +75,47 @@ var G1sUtil = new function() {
       success : f
     });
   }
+  o.getParam = function(u){
+    u = o.isEmpty(u)?location.href:u;
+    var p = u.indexOf('?')<0?'':u.substr(u.indexOf('?')+1);
+    var p1 = p.split('&');
+    var pp = {};
+    for(var i=0; i<p1.length; i++){
+      var p2 = p1[i].split('=');
+      if(p2.length > 1){
+        pp[p2[0]] = decodeURIComponent(p2[1]);
+      }
+    }
+    return pp;
+  }
+  o.addParam = function(u, p){
+      var pp = '';
+      if(typeof p == 'object'){
+        for(var pk in p){
+          if(!o.isEmpty(p[pk])){
+            pp += pk + '=' + p[pk] + '&';
+          }
+        }
+      } else {
+        pp = p;
+      }
+      return u + (o.isEmpty(pp)?'':(u.indexOf('?')>0?'&':'?'+pp));
+    
+  }
+
+
 
   var pfix = 'g1s';
   function gdata1(k, p) {
     var r = 'data-' + pfix;
-    if (!G1sUtil.isEmpty(k)) {
-      var t = G1sUtil.split(k.substring(0, 1).toLowerCase()
+    if (!o.isEmpty(k)) {
+      var t = o.split(k.substring(0, 1).toLowerCase()
           + k.substring(1), /[A-Z]/, 1);
       for ( var i in t) {
         r += '-' + t[i].toLowerCase();
       }
     }
-    if (!G1sUtil.isEmpty(p)) {
+    if (!o.isEmpty(p)) {
       r += '="' + p + '"'
     }
     return r;
@@ -95,8 +123,8 @@ var G1sUtil = new function() {
 
   function gdata2(k) {
     var r = pfix;
-    if (!G1sUtil.isEmpty(k)) {
-      var t = G1sUtil.split(k, '-');
+    if (!o.isEmpty(k)) {
+      var t = o.split(k, '-');
       for (var i = 0; i < t.length; i++) {
         r += t[i].substring(0, 1).toUpperCase() + t[i].substring(1)
       }
@@ -106,7 +134,7 @@ var G1sUtil = new function() {
 
   function _gDataValue($this, $data, index, d) {
     var dd = $this.data(d);
-    if (!G1sUtil.isEmpty(index)) {
+    if (!o.isEmpty(index)) {
       for ( var i in index) {
         dd = dd.replace(new RegExp('\\[\\$' + i + '\\]', 'gi'), '['
             + index[i] + ']');
@@ -127,9 +155,9 @@ var G1sUtil = new function() {
         continue;
       $this.data(gdata2('id'), $id)
 
-      if (!G1sUtil.isEmpty(data[gdata2('if')])) {
+      if (!o.isEmpty(data[gdata2('if')])) {
         var v = _gDataValue($this, $data, index, gdata2('if'))
-        if (G1sUtil.isEmpty(v) || v == false || v == 0) {
+        if (o.isEmpty(v) || v == false || v == 0) {
           $this.find('[' + gdata1() + ']').data(gdata2('id'), $id);
           $this.hide();
           return;
@@ -140,7 +168,7 @@ var G1sUtil = new function() {
 
       for ( var d in data) {
         if (d.startsWith(pfix) 
-            && G1sUtil.A2Z(d.substr(3, 1))
+            && o.A2Z(d.substr(3, 1))
             && d != gdata2('id') 
             && d != gdata2('class')
             && d != gdata2('if') 
@@ -153,7 +181,9 @@ var G1sUtil = new function() {
   }
 
   function _pushData($this, $data, $id, index, d) {
-    var v = _gDataValue($this, $data, index, d)
+    var v = '';
+    try{ v = _gDataValue($this, $data, index, d) } catch(e) { console.log(e); return; }
+
     if (d == gdata2('text')) {
       $this.text(v);
     } else if (d == gdata2('html')) {
@@ -175,7 +205,7 @@ var G1sUtil = new function() {
         var each = item.children().clone();
         $this.append(each);
 
-        var ii = (G1sUtil.isEmpty(index)) ? [] : index.slice();
+        var ii = (o.isEmpty(index)) ? [] : index.slice();
         ii.push(i);
         _push(each, $data, $id, ii);
         each.removeAttr(gdata1());
@@ -211,3 +241,32 @@ var G1sUtil = new function() {
 
   return o;
 };
+
+/* date format */
+if(new Date().format == undefined){
+  String.prototype.string = function(len){var s = '', i = 0; while (i++ < len) { s += this; } return s;};
+  String.prototype.zf = function(len){return "0".string(len - this.length) + this;};
+  Number.prototype.zf = function(len){return this.toString().zf(len);};
+  Date.prototype.format = function(f) {
+    if (!this.valueOf()) return " ";
+ 
+    var weekName = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    var d = this;
+     
+    return f.replace(/(yyyy|yy|MM|dd|E|hh|mm|ss|a\/p)/gi, function($1) {
+      switch ($1) {
+        case "yyyy": return d.getFullYear();
+        case "yy": return (d.getFullYear() % 1000).zf(2);
+        case "MM": return (d.getMonth() + 1).zf(2);
+        case "dd": return d.getDate().zf(2);
+        case "E": return weekName[d.getDay()];
+        case "HH": return d.getHours().zf(2);
+        case "hh": return ((h = d.getHours() % 12) ? h : 12).zf(2);
+        case "mm": return d.getMinutes().zf(2);
+        case "ss": return d.getSeconds().zf(2);
+        case "a/p": return d.getHours() < 12 ? "오전" : "오후";
+        default: return $1;
+      }
+    });
+  };
+}
