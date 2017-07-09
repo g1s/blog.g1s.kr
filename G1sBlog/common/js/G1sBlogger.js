@@ -1,28 +1,28 @@
-/** 
- * 필요 라이브러리 : 
+/** 필요 라이브러리 : 
  *  - jQuery.js
- *  - G1sUtil.js : 
- *    https://github.com/g1s/blog.g1s.kr/blob/master/G1sBlog/common/js/G1sUtil.js 
- * 
- * https://github.com/g1s/blog.g1s.kr/blob/master/G1sBlog/common/js/G1sBlogger.js 
+ *  - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js
+ *  - G1sUtil.js : https://github.com/g1s/blog.g1s.kr/tree/master/G1sBlog/common/js/G1sUtil.js 
  **/
 
 var G1sBlogger = new function() {
-  var r = { version : '1.0.1.0' };
-  r.feed = {};
+  var r = { version : '1.1.0.0' };
+  r.link = getFeedLink();
+  r.app = angular.module('app', []);
+  
   function getFeedLink() {
+    var l = {}; 
     var link = $('link');
     for (var i = 0; i < link.length; i++) {
       if (link[i].rel == 'service.post') {
-        r.feed.post = link[i].href;
-        r.blogId = r.feed.post.split('/')[4];
+        l.post = link[i].href;
+        r.blogId = l.post.split('/')[4];
       } else if (link[i].href.endsWith('/comments/default')) {
-        r.feed.comment = link[i].href;
-        r.postId = r.feed.comment.split('/')[4];
+        l.comment = link[i].href;
+        r.postId = l.comment.split('/')[4];
       }
     }
+    return l;
   }
-  getFeedLink();
 
   r.isAdmin = function() {
     return ($('span.blog-admin').css('display') != 'none')
@@ -53,7 +53,8 @@ var G1sBlogger = new function() {
     return img;
   }
   
-  r.getFeedReq = function(u){
+  /* blogger feed requester */
+  r.feed = function(u){
     return new function(u){
       var o = {};
       var _o = {
@@ -62,10 +63,9 @@ var G1sBlogger = new function() {
         type : 'posts',  /* posts, comments */
         range : 'summary',  /* summary, default */
         tag : '',
-        alt : 'json',
-        param : {}
+        param : { }
       };
-      
+
       o.setHost = function(u){
         if(u.includes('://')){
           var t = u.split('://');
@@ -85,12 +85,32 @@ var G1sBlogger = new function() {
             'summary':s.startsWith('default')?'default':s, o;
       }
 
-      o.setTag = function(s){
-        return _o.tag = G1sUtil.isEmpty(s)?'':s, o;
+      o.setLabel = function(s){
+        return _o.label = G1sUtil.isEmpty(s)?'':s, o;
       }
       
       o.setResult = function(s){
-    	  return _o.alt = G1sUtil.isEmpty(s)?'json':s, o;
+    	  return o.setParam('alt',G1sUtil.isEmpty(s)?'json':s), o;
+      }
+
+      o.setStart = function(s){
+        return o.setParam('start-index',s), o;
+      }
+      
+      o.setMax = function(s){
+        return o.setParam('max-results',s), o;
+      }
+
+      o.setPublished = function(s, e){
+        return o.setParam('published-min',s), o.setParam('published-max',e), o;
+      }
+
+      o.setUpdated = function(s, e){
+        return o.setParam('update-min',s), o.setParam('update-max',e), o;
+      }
+
+      o.setOrderby = function(s){
+        return o.setParam('orderby',s), o;
       }
       
       o.setParam = function(k, v){
@@ -100,22 +120,22 @@ var G1sBlogger = new function() {
       o.removeParam = function(k){
         return _o.param[k] = undefined, delete _o.param[k], o;
       }
-      
+
       o.getUrl = function(){
-        var protocol = location.href.startsWith('https://')?'https':
-          G1sUtil.isEmpty(_o.protocol)?'http':_o.protocol;
+        var protocol = location.href.startsWith('https://')?'https':G1sUtil.isEmpty(_o.protocol)?'http':_o.protocol;
         var param = '';
         for(var k in _o.param){
-          param += '&' + k + '=' + _o.param[k];
+          if(!G1sUtil.isEmpty(_o.param[k])){
+            param += k + '=' + _o.param[k] + '&';
+          }
         }
         return protocol + '://' + (G1sUtil.isEmpty(_o.host)?location.href.split('/')[2]:_o.host)
           + '/feeds/'+ _o.type + '/' + _o.range
-          + (G1sUtil.isEmpty(_o.tag)?'':('/-/'+_o.tag))
-          + '?alt=' + _o.alt
-          + param;
+          + (G1sUtil.isEmpty(_o.label)?'':('/-/'+_o.label))
+          + '?' + param;
       }
       
-      o.submit = function(s){
+      o.request = function(s){
         $.ajax({
            type : "GET",
            url : o.getUrl(),
@@ -123,9 +143,12 @@ var G1sBlogger = new function() {
         });
       }
       
+      o.setResult();
       return o;
     };
   }
+
+  r.angual = function(){ return r.app; }
   
   return r;
 }
