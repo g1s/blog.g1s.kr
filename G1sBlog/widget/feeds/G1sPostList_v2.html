@@ -1,0 +1,252 @@
+<!--
+version : 2.0.0.0 
+필요 라이브러리
+  - jQuery.js
+  - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
+ -->
+<style>
+#G1sPostList {
+  list-style: none;
+  display:none;
+}
+#G1sPostList .now a {
+  font-weight: bold;
+}
+#G1sPostList .header .order{
+  float:right;
+}
+#G1sPostList .list .title {
+  clear:both;
+}
+#G1sPostList .list .info a {
+  color : green;
+}
+#G1sPostList .list .info .published {
+  float:right;
+}
+#G1sPostList .pages {
+  text-align: center;
+  float: left;
+  width: 100%;
+}
+#G1sPostList .pages ul li {
+  display:inline-block
+}
+#G1sPostList .pages a {
+  padding:5px;
+}
+</style>
+
+<div ng-controller="G1sPostList" id="G1sPostList">
+  <div class="header">
+    <b class="info">{{ label==''?'전체 리스트':'Label : ' }}</b>
+    <a ng-click="goLabel()" ng-show="label != ''" href="javascript:void(0)" class="btn">{{ label }}</a>
+    <a ng-click="goMonth()" ng-show="pubs != ''" href="javascript:void(0)" class="btn">{{ ('('+(pubs|date:'yyyy-MM')+')') }}</a>
+    <span class="order">
+      정렬 : 
+      <select ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)">
+      </select>
+    </span>
+  </div>
+  <ul class="list">
+    <li ng-repeat="post in feed.entry" >
+      <div class="title {{ (link.href==url?'now':'a') }}" ng-repeat="link in post.link | filter:{rel:'alternate'} ">
+        <a href="{{link.href|url:param}}">{{link.title|decode}}</a>
+      </div>
+      <div class="info">
+        <span class="category">
+          <a ng-repeat="category in post.category" ng-click="goLabel(category.term)" href="javascript:void(0)">[{{category.term}}]</a>
+        </span>
+        <span class="published">
+          <a ng-click="goMonth(post.published.$t)" href="javascript:void(0)">{{post.published.$t | bdate : 'yyyy-MM-dd HH:mm:ss'}}</a>
+        </span>
+      </div>
+    </li>
+  </ul>
+  <div class="pages">
+    <ul>
+      <li ng-show="pages[0]!=1"><a ng-click="goPage(pages[0]-1)" href="javascript:void(0)" class="prev">prev</a></li>
+      <li ng-repeat="page in pages" class="page {{page==now?'now':''}}">
+        <a ng-click="goPage(page)" href="javascript:void(0)">{{page}}</a>
+      </li>
+      <li ng-show="isNext"><a ng-click="goPage(pages[0]+maxPage)" href="javascript:void(0)" class="next">next</a></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function G1sPostList(maxPost, maxPage, orderby){
+  var app = getAngular();
+  if(!app) return;
+
+  app.controller('G1sPostList', function($scope, $http) {
+    { /** init **/
+      $scope.url = location.href.indexOf('?')>0?location.href.substr(0, location.href.indexOf('?')):location.href;
+      $scope.param = getParam();
+      $scope.maxPost = maxPost;
+      $scope.maxPage = maxPage;
+      $scope.orderby = $scope.param['g1sOrder']?$scope.param['g1sOrder']:orderby;
+      $scope.now = $scope.param['g1sNow']?$scope.param['g1sNow']:1;
+      $scope.label = $scope.param['g1sLabel']?$scope.param['g1sLabel']:'';
+      $scope.pubs = $scope.param['g1sPubls']?$scope.param['g1sPubls']:'';
+      $scope.pube = $scope.param['g1sPuble']?$scope.param['g1sPuble']:'';
+      $scope.orders = ['published', 'updated'];
+      render();
+    }
+
+    /** event func **/
+    $scope.goLabel = function(p){
+      $scope.label = (!p)?'':p;
+      $scope.goPage(1);
+    }
+
+    $scope.goMonth = function(p){
+      if(!p){
+        $scope.pubs = '';
+        $scope.pube = '';
+      } else { 
+        $scope.pubs = p.substr(0,7)+'-01T00:00:00';
+        $scope.pube = p.substr(0,7)+'-31T24:00:00';
+      }
+      $scope.goPage(1);
+    }
+
+    $scope.goYear = function(p){
+      if(!p){
+        goMonth();
+      } else {
+        $scope.pubs = p.substr(0,4)+'-01-01T00:00:00';
+        $scope.pube = p.substr(0,4)+'-12-31T24:00:00';
+      }
+      $scope.goPage(1);
+    }
+
+    $scope.goPage = function(p){
+      $scope.now = p;
+      render();
+    }
+
+    /** private func **/
+    function render(){
+      setParam()
+	  var url = '/feeds/posts/summary';
+      url += $scope.label?('/-/'+encodeURIComponent($scope.label)):'';
+      url += '?alt=json';
+      url += '&start-index='+(($scope.now-1)*maxPost+1);
+      url += '&max-results='+maxPost;
+      url += $scope.orderby?('&orderby='+$scope.orderby):'';
+      url += $scope.pubs?('&published-min='+$scope.pubs+'&published-max='+$scope.pube):'';
+      $http.get( url ).then( function(res){
+        $scope.feed = res.data.feed;
+        $scope.total = $scope.feed.openSearch$totalResults.$t;
+        $scope.pages = getPages($scope.now, maxPost, maxPage, $scope.total);
+        $scope.isNext= $scope.pages[0]+maxPage < $scope.total/maxPost;
+		$('#G1sPostList').show();
+      });
+    }
+    
+    function getPages(n, m1, m2, t){
+      var s = parseInt((n-1)/m2)*m2;
+      var e = s+m2;
+      if(e>(t-1)/m1+1) e = parseInt((t-1)/m1)+1;
+      var r = [];
+      for(var i=s+1; i<=e; i++){ r.push(i); }
+      return r;
+    }
+
+    function setParam(){
+      $scope.param.g1sNow = $scope.now==1?'':$scope.now;
+      $scope.param.g1sLabel = $scope.label;
+      $scope.param.g1sPubls = $scope.pubs;
+      $scope.param.g1sPuble = $scope.pube;
+      $scope.param.g1sOrder = $scope.orderby==orderby?'':$scope.orderby;
+    }
+  });
+
+  app.filter('url', function() {
+    return function(input, param) {
+      return addParam(input, param);
+    }
+  });
+
+  app.filter('decode', function() {
+    return function(input, param) {
+      return input.replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+    }
+  });
+
+  app.filter('bdate', function() {
+    return function(input, param) {
+      var d = new Date(input.substr(0, 23));
+      return d.format(param);
+    }
+  });
+
+  function getAngular(){
+    var appName = $('[ng-app]').attr('ng-app');
+    if(!appName){ appName = 'app'; $('html').attr('ng-app', appName) }
+	if(typeof angular == 'undefined') {
+      console.log('header에 angular.js를 추가해 주세요.\n<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"/>');
+	  return null;
+    }
+    return angular.module(appName, []);
+  }
+  function getParam(){
+    var u = location.href;
+    var p = u.indexOf('?')<0?'':u.substr(u.indexOf('?')+1);
+    var p1 = p.split('&');
+    var pp = {};
+    for(var i=0; i<p1.length; i++){
+      var p2 = p1[i].split('=');
+      if(p2.length > 1){
+        pp[p2[0]] = decodeURIComponent(p2[1]);
+      }
+    }
+    return pp;
+  }
+  function addParam(u, p){
+    var pp = '';
+    if(typeof p == 'object'){
+      for(var pk in p){
+        if(p[pk]){
+          pp += pk + '=' + p[pk] + '&';
+        }
+      }
+    } else {
+      pp = p;
+    }
+    return u + (!pp?'':(u.indexOf('?')>0?'&':'?'+pp));
+  }
+}
+/* date format */
+if(new Date().format == undefined){
+  String.prototype.string = function(len){var s = '', i = 0; while (i++ < len) { s += this; } return s;};
+  String.prototype.zf = function(len){return "0".string(len - this.length) + this;};
+  Number.prototype.zf = function(len){return this.toString().zf(len);};
+  Date.prototype.format = function(f) {
+    if (!this.valueOf()) return " ";
+ 
+    var weekName = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    var d = this;
+     
+    return f.replace(/(yyyy|yy|MM|dd|E|hh|mm|ss|a\/p)/gi, function($1) {
+      switch ($1) {
+        case "yyyy": return d.getFullYear();
+        case "yy": return (d.getFullYear() % 1000).zf(2);
+        case "MM": return (d.getMonth() + 1).zf(2);
+        case "dd": return d.getDate().zf(2);
+        case "E": return weekName[d.getDay()];
+        case "HH": return d.getHours().zf(2);
+        case "hh": return ((h = d.getHours() % 12) ? h : 12).zf(2);
+        case "mm": return d.getMinutes().zf(2);
+        case "ss": return d.getSeconds().zf(2);
+        case "a/p": return d.getHours() < 12 ? "오전" : "오후";
+        default: return $1;
+      }
+    });
+  };
+}
+G1sPostList(5, 10, 'published');
+</script>
