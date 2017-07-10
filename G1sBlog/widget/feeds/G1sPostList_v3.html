@@ -1,0 +1,187 @@
+<!--
+version : 3.0.0.0 
+필요 라이브러리
+  - jQuery.js
+  - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
+  - G1sUtil.js : https://github.com/g1s/blog.g1s.kr/tree/master/G1sBlog/common/js/G1sUtil.js 
+  - G1sBlogger.js : https://github.com/g1s/blog.g1s.kr/tree/master/G1sBlog/common/js/G1sBlogger.js 
+ -->
+<style>
+#G1sPostList {
+  display:none;
+  list-style: none;
+}
+#G1sPostList .now a {
+  font-weight: bold;
+}
+#G1sPostList .header .order{
+  float:right;
+}
+#G1sPostList .list .title {
+  clear:both;
+}
+#G1sPostList .list .info a {
+  color : green;
+}
+#G1sPostList .list .info .published {
+  float:right;
+}
+#G1sPostList .pages {
+  text-align: center;
+  float: left;
+  width: 100%;
+}
+#G1sPostList .pages ul li {
+  display:inline-block
+}
+#G1sPostList .pages a {
+  padding:5px;
+}
+</style>
+
+<div ng-controller="G1sPostList" id="G1sPostList">
+  <div class="header">
+    <b class="info">{{ label==''?'전체 리스트':'Label : ' }}</b>
+    <a ng-click="goLabel()" ng-show="label != ''" href="javascript:void(0)" class="btn">{{ label }}</a>
+    <a ng-click="goMonth()" ng-show="pubs != ''" href="javascript:void(0)" class="btn">{{ ('('+(pubs|date:'yyyy-MM')+')') }}</a>
+    <span class="order">
+      정렬 : 
+      <select ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)">
+      </select>
+    </span>
+  </div>
+  <ul class="list">
+    <li ng-repeat="post in feed.entry" >
+      <div class="title {{ (link.href==url?'now':'a') }}" ng-repeat="link in post.link | filter:{rel:'alternate'} ">
+        <a href="{{link.href|url:param}}">{{link.title|decode}}</a>
+      </div>
+      <div class="info">
+        <span class="category">
+          <a ng-repeat="category in post.category" ng-click="goLabel(category.term)" href="javascript:void(0)">[{{category.term}}]</a>
+        </span>
+        <span class="published">
+          <a ng-click="goMonth(post.published.$t)" href="javascript:void(0)">{{post.published.$t | bdate : 'yyyy-MM-dd HH:mm:ss'}}</a>
+        </span>
+      </div>
+    </li>
+  </ul>
+  <div class="pages">
+    <ul>
+      <li ng-show="pages[0]!=1"><a ng-click="goPage(pages[0]-1)" href="javascript:void(0)" class="prev">prev</a></li>
+      <li ng-repeat="page in pages" class="page {{page==now?'now':''}}">
+        <a ng-click="goPage(page)" href="javascript:void(0)">{{page}}</a>
+      </li>
+      <li ng-show="isNext"><a ng-click="goPage(pages[0]+maxPage)" href="javascript:void(0)" class="next">next</a></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function G1sPostList(maxPost, maxPage, orderby){
+  var app = G1sBlogger.angual();
+  var request = G1sBlogger.feed();
+  app.controller('G1sPostList', function($scope, $http) {
+    { /** init **/
+      $scope.url = location.href.indexOf('?')>0?location.href.substr(0, location.href.indexOf('?')):location.href;
+      $scope.param = G1sUtil.getParam();
+      $scope.maxPost = maxPost;
+      $scope.maxPage = maxPage;
+      $scope.orderby = G1sUtil.value($scope.param['g1sOrder'], orderby);
+      $scope.now = G1sUtil.value($scope.param['g1sNow'], 1);
+      $scope.label = G1sUtil.value($scope.param['g1sLabel'], '');
+      $scope.pubs = G1sUtil.value($scope.param['g1sPubls'], '');
+      $scope.pube = G1sUtil.value($scope.param['g1sPuble'], '');
+      $scope.orders = ['published', 'updated'];
+      request.setMax(maxPost);
+      render();
+    }
+
+    /** event func **/
+    $scope.goLabel = function(p){
+      $scope.label = G1sUtil.isEmpty(p)?'':p;
+      $scope.goPage(1);
+    }
+
+    $scope.goMonth = function(p){
+      if(G1sUtil.isEmpty(p)){
+        $scope.pubs = '';
+        $scope.pube = '';
+      } else { 
+        $scope.pubs = p.substr(0,7)+'-01T00:00:00';
+        $scope.pube = p.substr(0,7)+'-31T24:00:00';
+      }
+      $scope.goPage(1);
+    }
+
+    $scope.goYear = function(p){
+      if(G1sUtil.isEmpty(p)){
+        goMonth();
+      } else {
+        $scope.pubs = p.substr(0,4)+'-01-01T00:00:00';
+        $scope.pube = p.substr(0,4)+'-12-31T24:00:00';
+      }
+      $scope.goPage(1);
+    }
+
+    $scope.goPage = function(p){
+      $scope.now = p;
+      render();
+    }
+
+    /** private func **/
+    function render(){
+      setParam()
+      request.setOrderby($scope.orderby);
+      request.setStart(($scope.now-1)*maxPost+1);
+      request.setPublished($scope.pubs, $scope.pube);
+      request.setLabel($scope.label);
+      $http.get( request.getUrl() ).then( function(res){
+        $scope.feed = res.data.feed;
+        $scope.total = $scope.feed.openSearch$totalResults.$t;
+        $scope.pages = getPages($scope.now, maxPost, maxPage, $scope.total);
+        $scope.isNext= $scope.pages[0]+maxPage < $scope.total/maxPost;
+		$('#G1sPostList').show();
+      });
+    }
+    
+    function getPages(n, m1, m2, t){
+      var s = parseInt((n-1)/m2)*m2;
+      var e = s+m2;
+      if(e>(t-1)/m1+1) e = parseInt((t-1)/m1)+1;
+      var r = [];
+      for(var i=s+1; i<=e; i++){ r.push(i); }
+      return r;
+    }
+
+    function setParam(){
+      $scope.param.g1sNow = $scope.now==1?'':$scope.now;
+      $scope.param.g1sLabel = $scope.label;
+      $scope.param.g1sPubls = $scope.pubs;
+      $scope.param.g1sPuble = $scope.pube;
+      $scope.param.g1sOrder = $scope.orderby==orderby?'':$scope.orderby;
+    }
+  });
+
+  app.filter('url', function() {
+    return function(input, param) {
+      return G1sUtil.addParam(input, param);
+    }
+  });
+
+  app.filter('decode', function() {
+    return function(input, param) {
+      return input.replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+    }
+  });
+
+  app.filter('bdate', function() {
+    return function(input, param) {
+      var d = new Date(input.substr(0, 23));
+      return d.format(param);
+    }
+  });
+}
+G1sPostList(5, 10, 'published');
+</script>
