@@ -4,7 +4,7 @@
 var g$;
 var G1sUtil = new function() {
   var o = {};
-  o.version = '1.0.3.0';
+  o.version = '1.0.4.0';
   o.value = function(v,d){ return o.isEmpty(v)?d:v; }
   o.isEmpty = function(s) {
     return s == undefined 
@@ -243,7 +243,7 @@ var G1sUtil = new function() {
 };
 
 /* date format */
-if(new Date().format == undefined){
+if(! Date.prototype.format ){
   String.prototype.string = function(len){var s = '', i = 0; while (i++ < len) { s += this; } return s;};
   String.prototype.zf = function(len){return "0".string(len - this.length) + this;};
   Number.prototype.zf = function(len){return this.toString().zf(len);};
@@ -269,4 +269,16 @@ if(new Date().format == undefined){
       }
     });
   };
+}
+if(! String.prototype.startsWith ){
+  String.prototype.startsWith = function(str){
+    if (this.length < str.length) { return false; }
+    return this.indexOf(str) == 0;
+  }
+}
+if(! String.prototype.endsWith ){
+  String.prototype.endsWith = function(str){
+    if (this.length < str.length) { return false; }
+    return this.lastIndexOf(str) + str.length == this.length;
+  }
 }
