@@ -1,11 +1,10 @@
 /** 필요 라이브러리 : 
  *  - jQuery.js
- *  - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js
+ *  - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
  *  - G1sUtil.js : https://github.com/g1s/blog.g1s.kr/tree/master/G1sBlog/common/js/G1sUtil.js 
  **/
-
 var G1sBlogger = new function() {
-  var r = { version : '1.0.3.0' };
+  var r = { version : '1.0.3.1' };
   r.link = getFeedLink();
   r.app = angular.module('app', []);
   
@@ -131,7 +130,7 @@ var G1sBlogger = new function() {
         }
         return protocol + '://' + (G1sUtil.isEmpty(_o.host)?location.href.split('/')[2]:_o.host)
           + '/feeds/'+ _o.type + '/' + _o.range
-          + (G1sUtil.isEmpty(_o.label)?'':('/-/'+_o.label))
+          + (G1sUtil.isEmpty(_o.label)?'':('/-/'+encodeURIComponent(_o.label)))
           + '?' + param;
       }
       

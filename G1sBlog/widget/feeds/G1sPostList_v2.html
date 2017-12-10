@@ -1,5 +1,5 @@
 <!--
-version : 2.0.0.0 
+version : 2.0.1.0 
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -83,6 +83,10 @@ function G1sPostList(maxPost, maxPage, orderby){
     { /** init **/
       $scope.url = location.href.indexOf('?')>0?location.href.substr(0, location.href.indexOf('?')):location.href;
       $scope.param = getParam();
+      var urls = $scope.url.split("/");
+      if(urls.length > 4 && urls[3] == 'search' && urls[4] == 'label'){
+    	  $scope.param['g1sLabel'] = urls[5];
+      }
       $scope.maxPost = maxPost;
       $scope.maxPage = maxPage;
       $scope.orderby = $scope.param['g1sOrder']?$scope.param['g1sOrder']:orderby;
