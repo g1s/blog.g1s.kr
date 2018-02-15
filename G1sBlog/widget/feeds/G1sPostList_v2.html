@@ -1,75 +1,75 @@
 <!--
-version : 2.0.1.1
+version : 2.0.1.2
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
  -->
 <style>
 #G1sPostList {
-  list-style: none;
   display:none;
+  list-style: none;
 }
-#G1sPostList .now a {
+#G1sPostList .g1sNow a {
   font-weight: bold;
 }
-#G1sPostList .header .order{
+#G1sPostList .g1sHeader .g1sOrder{
   float:right;
 }
-#G1sPostList .list .title {
+#G1sPostList .g1sList .g1sTitle {
   clear:both;
 }
-#G1sPostList .list .info a {
+#G1sPostList .g1sList .g1sInfo a {
   color : green;
 }
-#G1sPostList .list .info .published {
+#G1sPostList .g1sList .g1sInfo .g1sPublishedy {
   float:right;
 }
-#G1sPostList .pages {
+#G1sPostList .g1sPages {
   text-align: center;
   float: left;
   width: 100%;
 }
-#G1sPostList .pages ul li {
+#G1sPostList .g1sPages ul li {
   display:inline-block
 }
-#G1sPostList .pages a {
+#G1sPostList .g1sPages a {
   padding:5px;
 }
 </style>
 
 <div ng-controller="G1sPostList" id="G1sPostList">
-  <div class="header">
-    <b class="info">{{ label==''?'전체 리스트':'Label : ' }}</b>
+  <div class="g1sHeader">
+    <b class="g1sInfo">{{ label==''?'전체 리스트':'Label : ' }}</b>
     <a ng-click="goLabel()" ng-show="label != ''" href="javascript:void(0)" class="btn">{{ label }}</a>
     <a ng-click="goMonth()" ng-show="pubs != ''" href="javascript:void(0)" class="btn">{{ ('('+(pubs|date:'yyyy-MM')+')') }}</a>
-    <span class="order">
+    <span class="g1sOrder">
       정렬 : 
       <select ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)">
       </select>
     </span>
   </div>
-  <ul class="list">
+  <ul class="g1sList">
     <li ng-repeat="post in feed.entry" >
-      <div class="title {{ (link.href==url?'now':'a') }}" ng-repeat="link in post.link | filter:{rel:'alternate'} ">
+      <div class="g1sTitle {{ (link.href==url?'g1sNow':'a') }}" ng-repeat="link in post.link | filter:{rel:'alternate'} ">
         <a href="{{link.href|url:param}}">{{link.title|decode}}</a>
       </div>
-      <div class="info">
-        <span class="category">
+      <div class="g1sInfo">
+        <span class="g1sCategory">
           <a ng-repeat="category in post.category" ng-click="goLabel(category.term)" href="javascript:void(0)">[{{category.term}}]</a>
         </span>
-        <span class="published">
+        <span class="g1sPublishedy">
           <a ng-click="goMonth(post.published.$t)" href="javascript:void(0)">{{post.published.$t | bdate : 'yyyy-MM-dd HH:mm:ss'}}</a>
         </span>
       </div>
     </li>
   </ul>
-  <div class="pages">
+  <div class="g1sPages">
     <ul>
-      <li ng-show="pages[0]!=1"><a ng-click="goPage(pages[0]-1)" href="javascript:void(0)" class="prev">prev</a></li>
-      <li ng-repeat="page in pages" class="page {{page==now?'now':''}}">
+      <li ng-show="pages[0]!=1"><a ng-click="goPage(pages[0]-1)" href="javascript:void(0)" class="g1sPrev">prev</a></li>
+      <li ng-repeat="page in pages" class="g1sPage {{page==now?'g1sNow':''}}">
         <a ng-click="goPage(page)" href="javascript:void(0)">{{page}}</a>
       </li>
-      <li ng-show="isNext"><a ng-click="goPage(pages[0]+maxPage)" href="javascript:void(0)" class="next">next</a></li>
+      <li ng-show="isNext"><a ng-click="goPage(pages[0]+maxPage)" href="javascript:void(0)" class="g1sNext">next</a></li>
     </ul>
   </div>
 </div>
