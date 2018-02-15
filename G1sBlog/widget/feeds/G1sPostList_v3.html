@@ -1,5 +1,5 @@
 <!--
-version : 3.0.1.2
+version : 3.0.1.3
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -23,7 +23,7 @@ version : 3.0.1.2
 #G1sPostList .g1sList .g1sInfo a {
   color : green;
 }
-#G1sPostList .g1sList .g1sInfo .g1sPublishedy {
+#G1sPostList .g1sList .g1sInfo .g1sPublished {
   float:right;
 }
 #G1sPostList .g1sPages {
@@ -59,7 +59,7 @@ version : 3.0.1.2
         <span class="g1sCategory">
           <a ng-repeat="category in post.category" ng-click="goLabel(category.term)" href="javascript:void(0)">[{{category.term}}]</a>
         </span>
-        <span class="g1sPublishedy">
+        <span class="g1sPublished">
           <a ng-click="goMonth(post.published.$t)" href="javascript:void(0)">{{post.published.$t | bdate : 'yyyy-MM-dd HH:mm:ss'}}</a>
         </span>
       </div>
