@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Insert title here</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<script src="daumMap.js"></script>
+	<style>
+		html, body, #map .map {width:100%; height:100%;}
+		#map {height:50%};
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+	<div id="info"></div>
+	<script>
+		var map = new navigator.maps.Map("#map");
+		
+		map.searchRTime({
+			clusterer : true
+		}, function(ret){
+			console.log("onSearch : "+ ret);
+			var html = "<ul>";
+			$.each(ret, function(i, v){
+				html += "<li>"+v.lat + "," + v.lng+"</li>"
+			});
+			html += "</ul>";
+			$("#info").html(html);
+		}, function(data){
+			console.log("onClick : "+ JSON.stringify(data));
+		});
+		
+	</script>
+</body>
+</html>
