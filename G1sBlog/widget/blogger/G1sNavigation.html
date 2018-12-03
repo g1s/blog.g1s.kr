@@ -4,13 +4,14 @@
 -->
 <script>
 var G1sNavigationList = {
-  init : function($list){
-    this.sortList($list);
+  init : function($linkList){
+    this.sortList($linkList);
     this.onListHover();
     this.onDrawerClick();
+    this.style($linkList);
   },
-  sortList : function($list){
-    var tempList = $list;
+  sortList : function($linkList){
+    var tempList = $linkList.find("li");
     var parent = null;
     var childUl = null;
     for( var i=0; i< tempList.length; i++ ){
@@ -39,11 +40,11 @@ var G1sNavigationList = {
   },
   onListHover : function(){
     $( ".navigation-list-off" ).hover(function(){
- $( this ).removeClass("navigation-list-off");
+      $( this ).removeClass("navigation-list-off");
     }, function(){
       if( ! ($( this ).hasClass("navigation-list-on")) ){
         $( this ).addClass("navigation-list-off");
- }
+      }
     });
   },
   onDrawerClick : function() {
@@ -59,28 +60,44 @@ var G1sNavigationList = {
         $( this )[0].text = '-';
       }
     });
+  },
+  style : function($linkList){
+    $linkList.find("ul").addClass("background-sub");
+    $linkList.find("li").addClass("background-main");
+    $linkList.find(".navigation-list-child li").removeClass("background-main");//.addClass("background-sub");
   }
 }
 
 $( ".navigation-list" ).ready(function() {
-  G1sNavigationList.init($('.LinkList li'));
+  G1sNavigationList.init($('.LinkList'));
 });
 </script>
 <style>
+.LinkList ul {
+  margin-top : 5px;
+  padding:1px 0px;
+}
+.LinkList .background-main {
+  margin: 1px 0px;
+  padding:0px;
+}
 .navigation-list-text {
   display: inline-block;
-  width:100%;
-  padding:10px 0px;
-  margin-right: -15px;
+  width: calc( 100% - 25px );
+  padding: 10px 0px;
+  margin-left: 25px;
 }
-.navigation-list-inner .widget li .navigation-list-button {
-  width:30px;
-  margin-left : -30px;
-}
-.navigation-list-child li {
-  background:#aaaaaa;
+.navigation-list-button {
+    display: inline-block;
+    position: absolute;
+    left: 0;
+    padding: 10px;
 }
 .navigation-list-off ul {
   display:none;
+}
+.navigation-list-child li a {
+  display: block;
+  padding: 0px 20px;
 }
 </style>

@@ -11,8 +11,8 @@
     <b:skin><![CDATA[/*
 -----------------------------------------------
 G1s Template Style
-Name :    G1s Master Detail
-URL : blog.g1s.kr
+Name : G1s Master Detail
+URL  : blog.g1s.kr
 ----------------------------------------------- */
 
 /* Variable definitions
@@ -33,6 +33,7 @@ URL : blog.g1s.kr
 
    <Group description="Master">
      <Variable name="master.background.color" description="Master Background" type="color" default="#ffffff" value="#ffffff"/>
+     <Variable name="master.background.color2" description="Master Background Sub" type="color" default="#ffffff" value="#ffffff"/>
      <Variable name="master.font" description="Font" type="font" default="normal normal 15px Arial, Tahoma, Helvetica, FreeSans, sans-serif" value="normal normal 15px Arial, Tahoma, Helvetica, FreeSans, sans-serif"/>
      <Variable name="master.font.title" description="Title Font" type="font" default="normal normal 15px Arial, Tahoma, Helvetica, FreeSans, sans-serif" value="normal bold 18px Arial, Tahoma, Helvetica, FreeSans, sans-serif"/>
      <Variable name="master.text.color" description="Master Text Color" type="color" default="#000000" value="#000000"/>
@@ -113,12 +114,18 @@ header, header a{
   -khtml-opacity: 0.5;        /* Safari 1.x */
   opacity: 0.5;               /* Good browsers */
 }
-.content-master-inner {
+.content-master-inner, .content-master-inner .background-main{
   background-color:$(master.background.color);
+}
+.content-master-inner li ul, .content-master-inner .background-sub {
+    background-color:$(master.background.color2);
+}
+.content-master-inner {
   position: relative;
   min-height:100%;
   height: 100%;
   overflow: auto;
+  padding-top: 10px;
 }
 .content-master-inner h2, .content-master-inner .title {
   font : $(master.font.title);

@@ -1,4 +1,4 @@
-»ç¿ëÇÑ °¡Á¬
+ì‚¬ìš©í•œ ê°€ì ¯
 
 Hidden
  - G1sUtil.js : /common/js/G1sUtil.js
@@ -10,11 +10,11 @@ Header
  - BloggerEdit : /widget/blogger/BloggerEdit.html
 
 sidebar-left-1
- - ÇìÆäÀÌÁö Çì´õ °¡Á¬: [Blogger °¡Á¬]
- - ºí·Î±× °Ë»ö °¡Á¬ : [Blogger °¡Á¬]
- - ¸µÅ© ¸ñ·Ï °¡Á¬ : [Blogger °¡Á¬]
- - ºí·Î±× Åë°è °¡Á¬ : [Blogger °¡Á¬]
- - ±¸µ¶ ¸µÅ© °¡Á¬ : [Blogger °¡Á¬]
+ - í˜ì´ì§€ í—¤ë” ê°€ì ¯: [Blogger ê°€ì ¯]
+ - ë¸”ë¡œê·¸ ê²€ìƒ‰ ê°€ì ¯ : [Blogger ê°€ì ¯]
+ - ë§í¬ ëª©ë¡ ê°€ì ¯ : [Blogger ê°€ì ¯]
+ - ë¸”ë¡œê·¸ í†µê³„ ê°€ì ¯ : [Blogger ê°€ì ¯]
+ - êµ¬ë… ë§í¬ ê°€ì ¯ : [Blogger ê°€ì ¯]
  - CCL
 
 Advertise
@@ -24,7 +24,7 @@ sidebar-right-1
  - G1sFeature : /widget/feeds/G1sFeature.html
  
 sidebar-right-2-1
- - °¡Àå ¸¹ÀÌ º» ±Û °¡Á¬ : [Blogger °¡Á¬]
+ - ê°€ì¥ ë§ì´ ë³¸ ê¸€ ê°€ì ¯ : [Blogger ê°€ì ¯]
 
 sidebar-right-2-2
  - G1sMainPost : /widget/feeds/G1sMainPost.html
@@ -39,8 +39,8 @@ footer-1
  -
 
 footer2-1
- - ºí·Î±× º¸°üÇÔ °¡Á¬ : [Blogger °¡Á¬]
+ - ë¸”ë¡œê·¸ ë³´ê´€í•¨ ê°€ì ¯ : [Blogger ê°€ì ¯]
 
 footer2-2
- - Label : [Blogger °¡Á¬]
+ - Label : [Blogger ê°€ì ¯]
  - TopButton : /widget/simple/TopButton.html
