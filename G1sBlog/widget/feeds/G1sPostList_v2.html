@@ -1,5 +1,5 @@
 <!--
-version : 2.0.1.4
+version : 2.0.1.5
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -44,8 +44,11 @@ version : 2.0.1.4
     <a ng-click="goMonth()" ng-show="pubs != ''" href="javascript:void(0)" class="btn">{{ ('('+(pubs|date:'yyyy-MM')+')') }}</a>
     <span class="g1sOrder">
       정렬 : 
-      <select ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)">
-      </select>
+      <select ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)"></select>
+      <select ng-model="label" ng-change="goPage(1)">
+		<option value="">= Label =</option>
+		<option ng-repeat="category in feed.category" value="{{category.term}}">{{category.term}}</option>
+	  </select>
     </span>
   </div>
   <ul class="g1sList">
@@ -145,7 +148,7 @@ function G1sPostList(maxPost, maxPage, orderby){
         $scope.total = $scope.feed.openSearch$totalResults.$t;
         $scope.pages = getPages($scope.now, maxPost, maxPage, $scope.total);
         $scope.isNext= $scope.pages[0]+(maxPage-1) < $scope.total/maxPost;
-		$('#G1sPostList').show();
+        $('#G1sPostList').show();
       });
     }
     
