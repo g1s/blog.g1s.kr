@@ -1,0 +1,121 @@
+<!--
+version : 1.0.0.0
+필요 라이브러리
+  - jQuery.js
+ -->
+<style>
+#G1sTagList ul { padding : 0px; }
+#G1sTagList .g1sNow { font-weight: bold; }
+#G1sTagList .g1sHeader .g1sOrder{ float:right; }
+#G1sTagList .g1sList .g1sTitle { clear:both; }
+#G1sTagList .g1sList .g1sInfo { color : green; }
+#G1sTagList .g1sList .g1sInfo .g1sPublished { float:right; }
+#G1sTagList .g1sPages li { display:inline-block }
+#G1sTagList .g1sPages a { padding:5px; }
+#G1sTagList .g1sPages {
+  text-align: center;
+  float: left;
+  width: 100%;
+}
+
+</style>
+<script>
+var G1sTagList = new function(){
+  var nowHref = location.href.split('?')[0]; 
+  this.render = function($obj, pTag, pPosts, pPages, pPage){
+    $obj.attr('id', 'G1sTagList');
+    if(!pPosts && !pPages ){
+      pPosts = 999999;
+      pPages = 1;
+    } else if(!pPosts) {
+      pPosts = 5;
+    } else if(!pPages) {
+      pPages = 10;
+    }
+    pPage = pPage || 1;
+
+    $obj.data('g1sTag', pTag);
+    $obj.data('g1sPosts', pPosts);
+    $obj.data('g1sPages', pPages);
+    
+    var url = '/feeds/posts/summary/-/' + pTag + '?alt=json';
+    url += '&start-index='+((pPage-1)*pPosts+1);
+    url += '&max-results='+pPosts;
+    $.ajax({
+      type: "GET",
+      url: url,
+      dataType: "json",
+      success : function(res){
+        var feed = res.feed;
+        var html = '';
+        html += '<ul class="g1sList">'
+        
+        // Post List
+        $.each(feed.entry, function(idx, post){
+          var link = post.link.filter(function (link) { return link.rel == 'alternate'; })[0];
+          html += '<li >';
+          html +=   '<a href="'+link.href+'">'
+          if(link.href == nowHref){
+        	html +=   '<div class="g1sTitle g1sNow">'+_decode(link.title)+'</div>';
+          } else {
+            html +=   '<div class="g1sTitle">'+_decode(link.title)+'</div>';
+          }
+          html +=     '<div class="g1sInfo">';
+          html +=       '<span class="g1sCategory">';
+          $.each(post.category, function(idx2, category){
+            html +=       '<em>['+category.term+']</em>';
+          });
+          html +=       '</span>';
+          html +=       '<span class="g1sPublished">'+_date(post.published.$t, 'yyyy-MM-dd HH:mm:ss')+'</span>';
+          html +=     '</div>';
+          html +=   '</a>';
+          html += '</li>';
+        });
+        html += '</ul>';
+        
+        // Page List
+        var total = feed.openSearch$totalResults.$t;
+        var maxPages = Math.ceil(total/pPosts);
+        if(maxPages > 1){
+          var p = parseInt((pPage-1)/pPages)*pPages;
+          html += '<ul class="g1sPages">'
+          if(p != 0) html += '<li><a onClick="G1sTagList.page(this, '+p+')" href="javascript:void(0)" class="g1sPage">prev</a></li>';
+          for(var i=1; i<=pPages; i++){
+        	var page = p+i;
+            if(page > maxPages) break;
+            if(page == pPage){
+                html += '<li><a onClick="G1sTagList.page(this, '+page+')" href="javascript:void(0)" class="g1sPage g1sNow">'+page+'</a></li>';
+            } else {
+                html += '<li><a onClick="G1sTagList.page(this, '+page+')" href="javascript:void(0)" class="g1sPage">'+page+'</a></li>';
+            }
+          }
+          var next = p+pPages+1;
+          if(next < maxPages) html += '<li><a onClick="G1sTagList.page(this, '+next+')" href="javascript:void(0)" class="g1sPage">next</a></li>';
+          html += '</ul>';
+        }
+        $obj.html(html);
+      }
+    });
+  }
+  
+  this.page = function(self, pPage){
+    var $parent = $(self).closest('[data-g1s-tag]');
+    G1sTagList.render($parent.closest('[data-g1s-tag]'), $parent.data('g1sTag'), $parent.data('g1sPosts'), $parent.data('g1sPages'), pPage);
+  }
+  
+  function _decode(input){
+    return input.replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">");
+  }
+  function _date(input, format){
+    return new Date(input.substr(0, 23)).format(format);;
+  }
+}
+
+$('[data-g1s-tag]').ready(function(){
+  $('[data-g1s-tag]').each(function(self){
+    G1sTagList.render($(this), $(this).data('g1sTag'), $(this).data('g1sPosts'), $(this).data('g1sPages'));
+  });
+});
+</script>
