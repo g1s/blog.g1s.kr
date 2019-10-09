@@ -1,5 +1,5 @@
 <!--
-version : 3.0.1.5
+version : 3.0.1.6
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -56,7 +56,7 @@ version : 3.0.1.5
   <ul class="g1sList">
     <li ng-repeat="post in feed.entry" >
       <div class="g1sTitle {{ (link.href==url?'g1sNow':'a') }}" ng-repeat="link in post.link | filter:{rel:'alternate'} ">
-        <a href="{{link.href|url:param}}">{{link.title|decode}}</a>
+        <a href="{{link.href|url:param}}">{{link.title|decode}} ({{post.thr$total.$t}})</a>
       </div>
       <div class="g1sInfo">
         <span class="g1sCategory">
