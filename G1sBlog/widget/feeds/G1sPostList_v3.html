@@ -1,5 +1,5 @@
 <!--
-version : 3.0.1.6
+version : 3.0.2.0
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -37,24 +37,29 @@ version : 3.0.1.6
 #G1sPostList .g1sPages a {
   padding:5px;
 }
+#G1sPostList input[type=text] {
+    width: 200px;
+}
 </style>
 
 <div ng-controller="G1sPostList" id="G1sPostList">
   <div class="g1sHeader">
-    <b class="g1sInfo">{{ label==''?'전체 리스트':'Label : ' }}</b>
+    <b class="g1sInfo">{{ label!='' ? 'Label : ' : (q!='' ? '검색 : ' : '전체 리스트') }}</b>
     <a ng-click="goLabel()" ng-show="label != ''" href="javascript:void(0)" class="btn">{{ label }}</a>
+    <a ng-click="goLabel()" ng-show="q != ''" href="javascript:void(0)" class="btn">{{ q }}</a>
     <a ng-click="goMonth()" ng-show="pubs != ''" href="javascript:void(0)" class="btn">{{ ('('+(pubs|date:'yyyy-MM')+')') }}</a>
     <span class="g1sOrder">
-      정렬 : 
+      <input type="text" ng-model="tempQ" ng-keypress="search($event)" placeholder="검색어 입력후 Enter를 누르세요"/>
+         정렬 :  
       <select ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)"></select>
-      <select ng-model="label" ng-change="goPage(1)">
+      <select ng-model="label" ng-change="goLabel(label)">
 		<option value="">= Category =</option>
 		<option ng-repeat="category in feed.category" value="{{category.term}}">{{category.term}}</option>
 	  </select>
     </span>
   </div>
   <ul class="g1sList">
-    <li ng-repeat="post in feed.entry" >
+    <li ng-repeat="post in posts" >
       <div class="g1sTitle {{ (link.href==url?'g1sNow':'a') }}" ng-repeat="link in post.link | filter:{rel:'alternate'} ">
         <a href="{{link.href|url:param}}">{{link.title|decode}} ({{post.thr$total.$t}})</a>
       </div>
@@ -68,7 +73,7 @@ version : 3.0.1.6
       </div>
     </li>
   </ul>
-  <div class="g1sPages">
+  <div ng-show="pages" class="g1sPages">
     <ul>
       <li ng-show="pages[0]!=1"><a ng-click="goPage(pages[0]-1)" href="javascript:void(0)" class="g1sPrev">prev</a></li>
       <li ng-repeat="page in pages" class="g1sPage {{page==now?'g1sNow':''}}">
@@ -98,14 +103,25 @@ function G1sPostList(maxPost, maxPage, orderby){
       $scope.label = G1sUtil.value($scope.param['g1sLabel'], '');
       $scope.pubs = G1sUtil.value($scope.param['g1sPubls'], '');
       $scope.pube = G1sUtil.value($scope.param['g1sPuble'], '');
+      $scope.q = $scope.tempQ= $scope.param['g1sQ']?$scope.param['g1sQ']:'';
       $scope.orders = ['published', 'updated'];
-      request.setMax(maxPost);
       render();
     }
-
+	
+    $scope.search = function($event){
+    	var keyCode = window.event ? $event.keyCode : $event.which;
+    	if(keyCode == 13){
+            $scope.label = '';
+    		$scope.q = $scope.tempQ;
+    		$scope.qMode = false;
+    		$scope.goPage(1);
+    	}
+    };
+    
     /** event func **/
     $scope.goLabel = function(p){
       $scope.label = G1sUtil.isEmpty(p)?'':p;
+      $scope.q = $scope.tempQ = '';
       $scope.goPage(1);
     }
 
@@ -134,21 +150,56 @@ function G1sPostList(maxPost, maxPage, orderby){
       $scope.now = p;
       render();
     }
-
+    
     /** private func **/
     function render(){
       setParam()
+      if($scope.q){
+          if($scope.qMode){
+            return setResult();
+          } else {
+            request.setQ($scope.q);
+            request.setMax(500);
+            request.setLabel(null);
+            request.setStart(null);
+          }
+      } else {
+    	  request.setQ(null);
+          request.setMax(maxPost);
+          request.setLabel($scope.label);
+          request.setStart(($scope.now-1)*maxPost+1);
+      }
       request.setOrderby($scope.orderby);
-      request.setStart(($scope.now-1)*maxPost+1);
       request.setPublished($scope.pubs, $scope.pube);
-      request.setLabel($scope.label);
       $http.get( request.getUrl() ).then( function(res){
         $scope.feed = res.data.feed;
+        setResult();
+      });
+    }
+    
+    function setResult(){
         $scope.total = $scope.feed.openSearch$totalResults.$t;
         $scope.pages = getPages($scope.now, maxPost, maxPage, $scope.total);
         $scope.isNext= $scope.pages[0]+(maxPage-1) < $scope.total/maxPost;
+        //*
+        if($scope.q){
+        	$scope.qMode = true;
+        	$scope.posts = [];
+        	for(var i=0; i<maxPost; i++){
+        		var page = ($scope.now-1) * maxPost + i
+        		var post = $scope.feed.entry[page];
+        		if(post){
+                	$scope.posts.push(post);
+        		} else {
+        			break;
+        		}
+        	}
+        } else {
+        	$scope.qMode = false;
+        	$scope.posts = $scope.feed.entry;
+        }
+        //*/
         $('#G1sPostList').show();
-      });
     }
     
     function getPages(n, m1, m2, t){
@@ -161,11 +212,12 @@ function G1sPostList(maxPost, maxPage, orderby){
     }
 
     function setParam(){
-      $scope.param.g1sNow = $scope.now==1?'':$scope.now;
+      $scope.param.g1sNow   = $scope.now==1?'':$scope.now;
       $scope.param.g1sLabel = $scope.label;
       $scope.param.g1sPubls = $scope.pubs;
       $scope.param.g1sPuble = $scope.pube;
       $scope.param.g1sOrder = $scope.orderby==orderby?'':$scope.orderby;
+      $scope.param.g1sQ     = $scope.tempQ;
     }
   });
 

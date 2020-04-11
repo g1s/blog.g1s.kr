@@ -4,7 +4,7 @@
 var g$;
 var G1sUtil = new function() {
   var o = {};
-  o.version = '1.0.4.0';
+  o.version = '1.0.4.1';
   o.value = function(v,d){ return o.isEmpty(v)?d:v; }
   o.isEmpty = function(s) {
     return s == undefined 
@@ -183,7 +183,8 @@ var G1sUtil = new function() {
   function _pushData($this, $data, $id, index, d) {
     var v = '';
     try{ v = _gDataValue($this, $data, index, d) } catch(e) { console.log(e); return; }
-
+    
+    if (!v) return;
     if (d == gdata2('text')) {
       $this.text(v);
     } else if (d == gdata2('html')) {

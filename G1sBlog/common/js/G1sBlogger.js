@@ -4,7 +4,7 @@
  *  - G1sUtil.js : https://github.com/g1s/blog.g1s.kr/tree/master/G1sBlog/common/js/G1sUtil.js 
  **/
 var G1sBlogger = new function() {
-  var r = { version : '1.0.3.1' };
+  var r = { version : '1.0.3.2' };
   r.link = getFeedLink();
   r.app = angular.module('app', []);
   
@@ -83,9 +83,13 @@ var G1sBlogger = new function() {
         return _o.range = (G1sUtil.isEmpty(s)||s.startsWith('summary'))?
             'summary':s.startsWith('default')?'default':s, o;
       }
-
+      
       o.setLabel = function(s){
         return _o.label = G1sUtil.isEmpty(s)?'':s, o;
+      }
+
+      o.setQ = function(s){
+        return o.setParam('q',s), o;
       }
       
       o.setResult = function(s){
