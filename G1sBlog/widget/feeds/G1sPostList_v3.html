@@ -1,5 +1,5 @@
 <!--
-version : 3.0.2.0
+version : 3.0.2.1
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -14,7 +14,7 @@ version : 3.0.2.0
 #G1sPostList .g1sNow a {
   font-weight: bold;
 }
-#G1sPostList .g1sHeader .g1sOrder{
+#G1sPostList .g1sHeader .g1sRight{
   float:right;
 }
 #G1sPostList .g1sList .g1sTitle {
@@ -48,14 +48,16 @@ version : 3.0.2.0
     <a ng-click="goLabel()" ng-show="label != ''" href="javascript:void(0)" class="btn">{{ label }}</a>
     <a ng-click="goLabel()" ng-show="q != ''" href="javascript:void(0)" class="btn">{{ q }}</a>
     <a ng-click="goMonth()" ng-show="pubs != ''" href="javascript:void(0)" class="btn">{{ ('('+(pubs|date:'yyyy-MM')+')') }}</a>
-    <span class="g1sOrder">
-      <input type="text" ng-model="tempQ" ng-keypress="search($event)" placeholder="검색어 입력후 Enter를 누르세요"/>
+    <span class="g1sRight">
          정렬 :  
       <select ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)"></select>
       <select ng-model="label" ng-change="goLabel(label)">
 		<option value="">= Category =</option>
 		<option ng-repeat="category in feed.category" value="{{category.term}}">{{category.term}}</option>
 	  </select>
+    </span>
+    <span class="g1sRight">
+      <input type="text" ng-model="tempQ" ng-keypress="search($event)" placeholder="검색어 입력후 Enter를 누르세요"/>
     </span>
   </div>
   <ul class="g1sList">
