@@ -1,5 +1,5 @@
 <!--
-version : 2.0.2.1
+version : 2.0.2.2
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -48,7 +48,8 @@ version : 2.0.2.1
     <a ng-click="goMonth()" ng-show="pubs != ''" href="javascript:void(0)" class="btn">{{ ('('+(pubs|date:'yyyy-MM')+')') }}</a>
     <span class="g1sRight">
          정렬 :  
-      <select ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)"></select>
+      <select ng-show="q == ''" ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)"></select>
+      <select ng-hide="q == ''" ng-model="orderby2" ng-options="y for y in orders2" ng-change="goPage(1)"></select>
       <select ng-model="label" ng-change="goLabel(label)">
 		<option value="">= Category =</option>
 		<option ng-repeat="category in feed.category" value="{{category.term}}">{{category.term}}</option>
@@ -85,9 +86,11 @@ version : 2.0.2.1
 </div>
 
 <script>
-function G1sPostList(maxPost, maxPage, orderby){
+function G1sPostList(maxPost, maxPage, orderby, orderby2){
   var app = getAngular();
   if(!app) return;
+  orderby = orderby||'published'
+  orderby2 = orderby2||'published'
 
   app.controller('G1sPostList', function($scope, $http) {
     { /** init **/
@@ -99,13 +102,15 @@ function G1sPostList(maxPost, maxPage, orderby){
       }
       $scope.maxPost = maxPost;
       $scope.maxPage = maxPage;
-      $scope.orderby = $scope.param['g1sOrder']?$scope.param['g1sOrder']:orderby;
+      $scope.orderby = ($scope.param['g1sOrder']?$scope.param['g1sOrder']:orderby)||'published';
+      $scope.orderby2 = ($scope.param['g1sOrder2']?$scope.param['g1sOrder2']:orderby2)||'search';
       $scope.now = $scope.param['g1sNow']?$scope.param['g1sNow']:1;
       $scope.label = $scope.param['g1sLabel']?$scope.param['g1sLabel']:'';
       $scope.pubs = $scope.param['g1sPubls']?$scope.param['g1sPubls']:'';
       $scope.pube = $scope.param['g1sPuble']?$scope.param['g1sPuble']:'';
       $scope.q = $scope.tempQ= $scope.param['g1sQ']?$scope.param['g1sQ']:'';
       $scope.orders = ['published', 'updated'];
+      $scope.orders2 = ['search', 'published', 'updated'];
       render();
     }
 	
@@ -167,10 +172,10 @@ function G1sPostList(maxPost, maxPage, orderby){
           url += $scope.label?('/-/'+encodeURIComponent($scope.label)):'';
           url += '?max-results='+maxPost;
           url += '&start-index='+(($scope.now-1)*maxPost+1);
+          url += $scope.orderby?('&orderby='+$scope.orderby):'';
+          url += $scope.pubs?('&published-min='+$scope.pubs+'&published-max='+$scope.pube):'';
       }
       url += '&alt=json';
-      url += $scope.orderby?('&orderby='+$scope.orderby):'';
-      url += $scope.pubs?('&published-min='+$scope.pubs+'&published-max='+$scope.pube):'';
       $http.get( url ).then( function(res){
           $scope.feed  = res.data.feed;
           setResult();
@@ -182,7 +187,26 @@ function G1sPostList(maxPost, maxPage, orderby){
         $scope.pages = getPages($scope.now, maxPost, maxPage, $scope.total);
         $scope.isNext= $scope.pages[0]+(maxPage-1) < $scope.total/maxPost;
         if($scope.q){
-        	$scope.qMode = true;
+        	if($scope.qMode == false){
+        		$scope.qMode = true;
+            	for(var i=0; i<$scope.feed.entry.length; i++){
+            		$scope.feed.entry[i].index = i;
+            	}
+                $scope.orderby2_ = 'search';
+        	}
+        	
+        	if($scope.orderby2 != $scope.orderby2_){
+        		$scope.feed.entry.sort(function(a, b) {
+        			if($scope.orderby2 == 'published'){
+        				return a.published.$t > b.published.$t?-1:1;
+        			} else if($scope.orderby2 == 'updated'){
+        				return a.updated.$t > b.updated.$t?-1:1;
+	        		} 
+	        		return a.index - b.index;
+        		});
+        		 $scope.orderby2_ = $scope.orderby2;
+        	}
+        	
         	$scope.posts = [];
         	for(var i=0; i<maxPost; i++){
         		var page = ($scope.now-1) * maxPost + i
@@ -210,12 +234,13 @@ function G1sPostList(maxPost, maxPage, orderby){
     }
 
     function setParam(){
-      $scope.param.g1sNow   = $scope.now==1?'':$scope.now;
-      $scope.param.g1sLabel = $scope.label;
-      $scope.param.g1sPubls = $scope.pubs;
-      $scope.param.g1sPuble = $scope.pube;
-      $scope.param.g1sOrder = $scope.orderby==orderby?'':$scope.orderby;
-      $scope.param.g1sQ     = $scope.tempQ;
+      $scope.param.g1sNow    = $scope.now==1?'':$scope.now;
+      $scope.param.g1sLabel  = $scope.label;
+      $scope.param.g1sPubls  = $scope.pubs;
+      $scope.param.g1sPuble  = $scope.pube;
+      $scope.param.g1sOrder  = $scope.orderby==orderby?'':$scope.orderby;
+      $scope.param.g1sOrder2 = $scope.orderby2==orderby2?'':$scope.orderby2;
+      $scope.param.g1sQ      = $scope.tempQ;
     }
   });
 
@@ -304,5 +329,5 @@ if(new Date().format == undefined){
     });
   };
 }
-G1sPostList(5, 10, 'published');
+G1sPostList(5, 10, 'published', 'published');
 </script>
