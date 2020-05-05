@@ -28,7 +28,6 @@ version : 3.0.2.2
 }
 #G1sPostList .g1sPages {
   text-align: center;
-  float: left;
   width: 100%;
 }
 #G1sPostList .g1sPages ul li {
@@ -49,9 +48,8 @@ version : 3.0.2.2
     <a ng-click="goLabel()" ng-show="q != ''" href="javascript:void(0)" class="btn">{{ q }}</a>
     <a ng-click="goMonth()" ng-show="pubs != ''" href="javascript:void(0)" class="btn">{{ ('('+(pubs|date:'yyyy-MM')+')') }}</a>
     <span class="g1sRight">
-         정렬 :  
-      <select ng-show="q == ''" ng-model="orderby" ng-options="x for x in orders" ng-change="goPage(1)"></select>
-      <select ng-hide="q == ''" ng-model="orderby2" ng-options="y for y in orders2" ng-change="goPage(1)"></select>
+      <select ng-show="q == ''" ng-model="orderby" ng-options="x.value as x.name for x in orders" ng-change="goPage(1)"></select>
+      <select ng-hide="q == ''" ng-model="orderby2" ng-options="y.value as y.name for y in orders2" ng-change="goPage(1)"></select>
       <select ng-model="label" ng-change="goLabel(label)">
 		<option value="">= Category =</option>
 		<option ng-repeat="category in feed.category" value="{{category.term}}">{{category.term}}</option>
@@ -111,8 +109,8 @@ function G1sPostList(maxPost, maxPage, orderby, orderby2){
       $scope.pubs = G1sUtil.value($scope.param['g1sPubls'], '');
       $scope.pube = G1sUtil.value($scope.param['g1sPuble'], '');
       $scope.q = $scope.tempQ= $scope.param['g1sQ']?$scope.param['g1sQ']:'';
-      $scope.orders = ['published', 'updated'];
-      $scope.orders2 = ['search', 'published', 'updated'];
+      $scope.orders = [{value:'published', name:'게시일순'}, {value:'updated', name:'업데이트순'}];
+      $scope.orders2 = [{value:'search', name:'검색순'}, {value:'published', name:'게시일순'}, {value:'updated', name:'업데이트순'}];
       render();
     }
 	
