@@ -1,5 +1,5 @@
 <!--
-version : 3.0.2.2
+version : 3.0.2.3
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -51,7 +51,7 @@ version : 3.0.2.2
       <select ng-show="q == ''" ng-model="orderby" ng-options="x.value as x.name for x in orders" ng-change="goPage(1)"></select>
       <select ng-hide="q == ''" ng-model="orderby2" ng-options="y.value as y.name for y in orders2" ng-change="goPage(1)"></select>
       <select ng-model="label" ng-change="goLabel(label)">
-		<option value="">= Category =</option>
+		<option value="">= 카테고리 =</option>
 		<option ng-repeat="category in feed.category" value="{{category.term}}">{{category.term}}</option>
 	  </select>
     </span>
