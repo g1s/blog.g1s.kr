@@ -185,7 +185,7 @@ function G1sPostList(maxPost, maxPage, orderby, orderby2){
         $scope.pages = getPages($scope.now, maxPost, maxPage, $scope.total);
         $scope.isNext= $scope.pages[0]+(maxPage-1) < $scope.total/maxPost;
         if($scope.q){
-        	if($scope.qMode == false){
+        	if($scope.qMode != true){
         		$scope.qMode = true;
             	for(var i=0; i<$scope.feed.entry.length; i++){
             		$scope.feed.entry[i].index = i;
