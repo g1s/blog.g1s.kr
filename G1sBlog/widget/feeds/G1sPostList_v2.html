@@ -1,5 +1,5 @@
 <!--
-version : 2.0.2.3
+version : 2.0.2.4
 필요 라이브러리
   - jQuery.js
   - angular.js : https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js
@@ -185,7 +185,7 @@ function G1sPostList(maxPost, maxPage, orderby, orderby2){
         $scope.pages = getPages($scope.now, maxPost, maxPage, $scope.total);
         $scope.isNext= $scope.pages[0]+(maxPage-1) < $scope.total/maxPost;
         if($scope.q){
-        	if($scope.qMode != true){
+        	if(!$scope.qMode){
         		$scope.qMode = true;
             	for(var i=0; i<$scope.feed.entry.length; i++){
             		$scope.feed.entry[i].index = i;
